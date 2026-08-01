@@ -1,6 +1,11 @@
-# Serenity/JS Cucumber Playwright Template
+# NeoFlow-QA 🤖✨
 
-This repository provides an automated BDD testing framework built on **Serenity/JS**, **Cucumber.js**, **Playwright**, and **TypeScript**, along with a custom AI agent (`neo`) workflow for BDD script generation.
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+[![Node.js Version](https://img.shields.io/badge/node-%5E18.12%20%7C%7C%20%5E20%20%7C%7C%20%5E22-brightgreen)](package.json)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Serenity/JS](https://img.shields.io/badge/Serenity%2FJS-3.32.3-blueviolet)](https://serenity-js.org)
+
+This repository provides an automated agentic BDD testing framework built on **Serenity/JS**, **Cucumber.js**, **Playwright**, and **TypeScript**, powered by the custom **`neo`** AI agent workflow.
 
 ### Installation
 

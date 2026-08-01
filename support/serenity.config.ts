@@ -106,7 +106,7 @@ BeforeAll(async () => {
             [ '@serenity-js/core:ArtifactArchiver', { outputDirectory: path.resolve(process.cwd(), 'target/site/serenity') } ],
             [ '@serenity-js/serenity-bdd', { 
                 specDirectory: path.resolve(process.cwd(), 'features'),
-                project: 'My Custom Project Name'
+                project: 'NeoFlow-QA'
             } ],
         ],
 
