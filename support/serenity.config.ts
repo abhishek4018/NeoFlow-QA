@@ -30,7 +30,11 @@ const browserTypes = {
     firefox: playwright.firefox,
     webkit: playwright.webkit,
 };
-const browserTypeKey = (process.env.BROWSER || 'chromium') as keyof typeof browserTypes;
+const useLambdaTest = process.env.USE_LAMBDATEST?.toLowerCase() === 'true';
+const browserTypeKey = (useLambdaTest
+    ? process.env.LT_BROWSER || process.env.BROWSER
+    : process.env.BROWSER
+) as keyof typeof browserTypes;
 const browserType = browserTypes[browserTypeKey] || playwright.chromium;
 const environment = process.env.ENVIRONMENT || 'dev';
 
@@ -48,10 +52,37 @@ let browser: playwright.Browser;
 setDefaultTimeout(timeouts.cucumber.step.inMilliseconds());
 
 BeforeAll(async () => {
-    // Launch the browser once before all the tests
-    browser = await browserType.launch({
-        headless: false,
-    });
+    if (useLambdaTest) {
+        const username = process.env.LT_USERNAME;
+        const accessKey = process.env.LT_ACCESS_KEY;
+
+        if (!username || !accessKey) {
+            throw new Error('LambdaTest requires LT_USERNAME and LT_ACCESS_KEY when USE_LAMBDATEST=true');
+        }
+
+        const ltBrowserName = process.env.LT_BROWSER || browserTypeKey || 'chromium';
+        const capabilities = {
+            browserName: ltBrowserName,
+            browserVersion: process.env.LT_BROWSER_VERSION || 'latest',
+            platformName: process.env.LT_PLATFORM || 'Windows 11',
+            'LT:Options': {
+                username,
+                accessKey,
+                build: process.env.LT_BUILD,
+                name: process.env.LT_TEST_NAME,
+            },
+        };
+
+        const wsEndpoint = `wss://cdp.lambdatest.com/playwright?capabilities=${encodeURIComponent(JSON.stringify(capabilities))}`;
+
+        browser = await browserType.connect({ wsEndpoint });
+    }
+    else {
+        // Launch the browser once before all the tests
+        browser = await browserType.launch({
+            headless: false,
+        });
+    }
 
     // Configure Serenity/JS
     configure({

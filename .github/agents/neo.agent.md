@@ -10,7 +10,6 @@ tools:
     user-invocable: true
     argument-hint: "Provide a scenario, feature snippet, or raw script path plus feature/tag context (for example: validate search for SONY HT-S2000 on flipkart, @SearchFlow)."
 ---
-
 ## Neo repository agent
 
 This agent is the repository-level BDD generation orchestrator for SerenityJS in this project.
@@ -25,7 +24,7 @@ This agent is the repository-level BDD generation orchestrator for SerenityJS in
    - `npx playwright test -c playwright.codegen.config.ts codegen/<name>_raw.spec.ts`
 3. Only after raw replay passes, invoke `serenity-script-generator`.
    - Generate `features/codegen/<name>.feature`.
-   - Generate `features/step-definitions/codegen/<name>.steps.ts`.
+   - Generate `step-definitions/codegen/<name>.steps.ts`.
 4. Preserve tag consistency between the generated feature file and CLI execution.
 5. Do not silently overwrite existing artifacts.
 
