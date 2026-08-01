@@ -75,6 +75,27 @@ You can control which browser and environment are used for your tests by setting
 BROWSER=firefox ENVIRONMENT=prod npm test
 ```
 
+This project also loads a `.env` file from the repository root automatically when `support/serenity.config.ts` is initialized.
+
+Use `.env` for local run defaults, or to store credentials and other environment-specific values without exporting them manually.
+
+Example `.env` values:
+
+```
+USE_LAMBDATEST=false
+BROWSER=chromium
+ENVIRONMENT=qa
+
+# LambdaTest credentials and capability overrides (optional)
+# LT_USERNAME=YOUR_LAMBDATEST_USERNAME
+# LT_ACCESS_KEY=YOUR_LAMBDATEST_ACCESS_KEY
+# LT_BROWSER=chromium
+# LT_BROWSER_VERSION=Latest
+# LT_PLATFORM=Windows 11
+# LT_BUILD=Serenity Cucumber Playwright Demo
+# LT_TEST_NAME=Test
+```
+
 - `BROWSER` can be `chromium`, `firefox`, or `webkit` (defaults to `chromium` if not set).
 - `ENVIRONMENT` can be `dev`, `qa`, or `prod` (defaults to `dev` if not set).
 - The environment selects the base URL from `baseUrls` in [`support/serenity.config.ts`](support/serenity.config.ts). With the default map, `dev` and `qa` use an empty base URL; use **`ENVIRONMENT=prod`** (or set `baseUrls` for your env) for scenarios that rely on `Navigate.to('')` against Happiest Health.
