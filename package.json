@@ -1,7 +1,7 @@
 {
-  "name": "serenity-js-cucumber-playwright-template",
+  "name": "neoflow-qa",
   "version": "3.0.0",
-  "description": "",
+  "description": "Agentic BDD Automation Engine combining Serenity/JS, Cucumber, Playwright, and AI Workflows",
   "main": "index.js",
   "scripts": {
     "clean": "rimraf target",
@@ -18,20 +18,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/serenity-js/serenity-js-cucumber-playwright-template.git"
+    "url": "git+https://github.com/abhishek4018/NeoFlow-QA.git"
   },
   "keywords": [
+    "neoflow",
     "serenity-js",
     "bdd",
     "cucumber",
     "testing",
     "playwright",
+    "agentic-ai",
     "playwright-test"
   ],
-  "author": "Jan Molak <jan.molak@smartcodeltd.co.uk>",
+  "author": "Abhishek Kumar",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/serenity-js/serenity-js-cucumber-playwright-template/issues"
+    "url": "https://github.com/abhishek4018/NeoFlow-QA/issues"
   },
   "homepage": "https://serenity-js.org",
   "engines": {
