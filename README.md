@@ -1,5 +1,6 @@
 # Serenity/JS Cucumber Playwright Template
 
+This repository provides an automated BDD testing framework built on **Serenity/JS**, **Cucumber.js**, **Playwright**, and **TypeScript**, along with a custom AI agent (`neo`) workflow for BDD script generation.
 
 ### Installation
 
@@ -17,12 +18,12 @@ npx playwright install
 The project provides several [NPM scripts](https://docs.npmjs.com/cli/v6/using-npm/scripts) defined in [`package.json`](package.json):
 
 ```
-npm run lint            # runs code linter
+npm run lint            # runs code linter via ESLint
 npm run lint:fix        # attempts to automatically fix linting issues
 npm run clean           # removes reports from any previous test run
 npm test                # executes the example test suite
                         # and generates the report under ./target/site/serenity
-npm start               # starts a mini HTTP server and serves the test reports
+npm start               # starts a mini HTTP server and serves test reports
                         # at http://localhost:8080
 npm run codegen         # Playwright codegen (CLI default: playwright-test style)
 npm run codegen:library # record using the JavaScript library API; saves to generated/codegen/recording.ts
@@ -30,11 +31,12 @@ npm run codegen:library:preview   # same target as above, but UI only (no file w
 npm run codegen:playwright-test   # record with @playwright/test-style output
 ```
 
-## Playwright Codegen (record and generate scripts)
+## Playwright Codegen & Raw Script Replays
 
-[Playwright codegen](https://playwright.dev/docs/codegen) opens a browser and the inspector; actions you perform are turned into code. Browsers must be installed (see **Installation** above).
+[Playwright codegen](https://playwright.dev/docs/codegen) opens a browser and the inspector; actions you perform are recorded into code. Browsers must be installed (see **Installation** above).
 
-**Saving output:** Playwright writes a file only when you pass `-o` / `--output`. The `codegen:library` script includes `-o generated/codegen/recording.ts`, so each recording updates that file on disk. Use `codegen:library:preview` when you only want the inspector and do not need a saved file.
+### 1. Saving Output
+Playwright writes a file when you pass `-o` / `--output`. The `codegen:library` script includes `-o generated/codegen/recording.ts`, so each recording updates that file on disk. Use `codegen:library:preview` when you only want the inspector and do not need a saved file.
 
 **Examples:**
 
@@ -49,23 +51,33 @@ npm run codegen -- -b firefox --target javascript -o generated/codegen/recording
 npm run codegen -- --help
 ```
 
-**Run a saved recording** (standalone Playwright script; not part of `npm test` / Cucumber):
+### 2. Running Raw Playwright Test Specs
+Raw test scripts are stored under [`codegen/`](codegen/) (e.g. `codegen/manual_authoring_raw.spec.ts`). You can execute and stabilize raw Playwright scripts using the dedicated configuration [`playwright.codegen.config.ts`](playwright.codegen.config.ts):
+
+```sh
+# Execute a raw Playwright script using the codegen config
+npx playwright test -c playwright.codegen.config.ts codegen/manual_authoring_raw.spec.ts
+```
+
+Alternatively, run a standalone JS/TS recording file:
 
 ```sh
 npx ts-node --transpile-only generated/codegen/recording.ts
 ```
 
-Swap the path for another file (e.g. `generated/codegen/recording1.ts`) if you recorded to a different name. Requires `npx playwright install` so browsers are available.
+---
 
-**Cursor / VS Code:** **Terminal → Run Task…** (or **Tasks: Run Task**) and choose one of:
+## 🤖 Repository Agent & BDD Workflow (`neo`)
 
-- **Playwright: Codegen (record, default output)** — CLI default target (`playwright-test` style)
-- **Playwright: Codegen (library → saves generated/codegen/recording.ts)** — JavaScript library API and writes `recording.ts`
-- **Playwright: Codegen (library, preview only — no file)** — same as above without `-o`
+This repository defines a custom VS Code agent **`neo`** ([`.github/agents/neo.agent.md`](.github/agents/neo.agent.md)) and accompanying skills under `.github/skills/` to orchestrate end-to-end BDD script generation:
 
-**Serenity/JS note:** this project runs **Cucumber** scenarios, not `@playwright/test` specs. Treat generated code as a draft and map it into your feature files and step definitions under `features/` and `step-definitions/`.
+1. **Stage 1: Raw Playwright Generation & Replay (`playwright-script-generator`)**:
+   - Create or record raw scripts under `codegen/<name>_raw.spec.ts`.
+   - Replay and validate until execution succeeds (`npx playwright test -c playwright.codegen.config.ts codegen/<name>_raw.spec.ts`).
+2. **Stage 2: BDD Conversion (`serenity-script-generator`)**:
+   - Convert validated raw scripts into Cucumber Gherkin feature files ([`features/codegen/<name>.feature`](features/codegen/)) and Serenity/JS step definitions ([`step-definitions/codegen/<name>.steps.ts`](step-definitions/codegen/)).
 
-Recordings under `generated/codegen/*.ts` are ignored by git (see `.gitignore`); the `generated/codegen/` folder is kept in the repo via `.gitkeep`.
+---
 
 ## Configuring Browser and Environment
 
@@ -75,7 +87,7 @@ You can control which browser and environment are used for your tests by setting
 BROWSER=firefox ENVIRONMENT=prod npm test
 ```
 
-This project also loads a `.env` file from the repository root automatically when `support/serenity.config.ts` is initialized.
+This project also loads a `.env` file from the repository root automatically when [`support/serenity.config.ts`](support/serenity.config.ts) is initialized.
 
 Use `.env` for local run defaults, or to store credentials and other environment-specific values without exporting them manually.
 
@@ -99,6 +111,8 @@ ENVIRONMENT=qa
 - `BROWSER` can be `chromium`, `firefox`, or `webkit` (defaults to `chromium` if not set).
 - `ENVIRONMENT` can be `dev`, `qa`, or `prod` (defaults to `dev` if not set).
 - The environment selects the base URL from `baseUrls` in [`support/serenity.config.ts`](support/serenity.config.ts). With the default map, `dev` and `qa` use an empty base URL; use **`ENVIRONMENT=prod`** (or set `baseUrls` for your env) for scenarios that rely on `Navigate.to('')` against Happiest Health.
+
+---
 
 ## Running Specific Scripts with Cucumber Tags
 
@@ -132,6 +146,8 @@ set BROWSER=firefox && set ENVIRONMENT=prod && npx cucumber-js --profile default
 ```powershell
 $env:BROWSER="firefox"; $env:ENVIRONMENT="prod"; npx cucumber-js --profile default --tags "@MyTest"; npx serenity-bdd run --features ./features
 ```
+
+---
 
 ## Running Tests and Generating Serenity/JS Report
 
