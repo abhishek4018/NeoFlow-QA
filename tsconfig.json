@@ -16,7 +16,9 @@
      "features/**/*.ts",
      "test/**/*.ts",
      "step-definitions/**/*.ts",
-     "support/**/*.ts"
+     "support/**/*.ts",
+     "codegen/**/*.ts",
+     "playwright.codegen.config.ts"
   ],
 
   "exclude": [
