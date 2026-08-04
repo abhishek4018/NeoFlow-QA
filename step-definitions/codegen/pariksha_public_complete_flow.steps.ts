@@ -5,6 +5,18 @@ import { Ensure, includes } from '@serenity-js/assertions';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
 import fs from 'fs';
 
+// Helper to resolve active environment base URL
+function getBaseUrl(): string {
+    const env = process.env.ENVIRONMENT || 'dev';
+    const baseUrls: Record<string, string> = {
+        dev: 'http://localhost:3000',
+        qa: 'https://uat.quickexamcreator.com',
+        uat: 'https://uat.quickexamcreator.com',
+        prod: 'https://quickexamcreator.com',
+    };
+    return process.env.BASE_URL || baseUrls[env] || 'http://localhost:3000';
+}
+
 // Locators
 const QuickGeneratorTextarea = () => PageElement.located(By.css('textarea')).describedAs('Quick Generator text input');
 const GenerateQuestionsButton = () => PageElement.located(By.id('btn-generate-questions')).describedAs('Generate Question Set button');
@@ -13,6 +25,14 @@ const SignupEmailInput = () => PageElement.located(By.id('input-signup-email')).
 const RequestMagicLinkButton = () => PageElement.located(By.id('btn-request-magic-link')).describedAs('Get Magic Link button');
 
 // Scenario 1: AI Question Generation & Magic Link Extraction
+Given('the faculty opens the Pariksha Public Workspace', async () => {
+    const actor = actorInTheSpotlight();
+    const baseUrl = getBaseUrl();
+    await actor.attemptsTo(
+        Navigate.to(`${baseUrl}/public`)
+    );
+});
+
 Given('the faculty opens the Pariksha Public Workspace at {string}', async (url: string) => {
     const actor = actorInTheSpotlight();
     await actor.attemptsTo(
@@ -71,7 +91,6 @@ When('the faculty proceeds to the Workspace Dashboard', async () => {
     const page = currentBrowserPage?.page || pages[pages.length - 1];
 
     if (page) {
-        // Dynamic wait for exact button ID once LLM finishes question generation
         const btn = page.locator('#btn-proceed-workspace');
         await btn.waitFor({ state: 'visible', timeout: 120000 });
         await btn.click();
@@ -101,7 +120,8 @@ Then('the faculty extracts and saves the magic link token', async () => {
         await link.waitFor({ state: 'visible', timeout: 15000 });
         const href = await link.getAttribute('href');
         if (href) {
-            const fullUrl = href.startsWith('http') ? href : `http://localhost:3000${href}`;
+            const baseUrl = getBaseUrl();
+            const fullUrl = href.startsWith('http') ? href : `${baseUrl}${href}`;
             try {
                 fs.writeFileSync('.magic_link_token.tmp', fullUrl);
             } catch (e) {}
@@ -112,10 +132,15 @@ Then('the faculty extracts and saves the magic link token', async () => {
 // Scenario 2: Dashboard Approval & Assessment Publishing
 Given('the faculty opens the creator dashboard using the saved magic link token', async () => {
     const actor = actorInTheSpotlight();
-    let dashboardUrl = 'http://localhost:3000/public';
+    const baseUrl = getBaseUrl();
+    let dashboardUrl = `${baseUrl}/public`;
     try {
         if (fs.existsSync('.magic_link_token.tmp')) {
-            dashboardUrl = fs.readFileSync('.magic_link_token.tmp', 'utf-8').trim();
+            let savedUrl = fs.readFileSync('.magic_link_token.tmp', 'utf-8').trim();
+            if (process.env.ENVIRONMENT === 'uat' || process.env.ENVIRONMENT === 'qa') {
+                savedUrl = savedUrl.replace('http://localhost:3000', 'https://uat.quickexamcreator.com');
+            }
+            dashboardUrl = savedUrl;
         }
     } catch (e) {}
     await actor.attemptsTo(
@@ -221,7 +246,8 @@ Then('the faculty extracts and saves the shareable public assessment link', asyn
             if (href) {
                 const match = href.match(/\/public\/exam\/(\d+)/);
                 if (match) {
-                    const examUrl = `http://localhost:3000/public/exam/${match[1]}`;
+                    const baseUrl = getBaseUrl();
+                    const examUrl = `${baseUrl}/public/exam/${match[1]}`;
                     try {
                         fs.writeFileSync('.shareable_exam_link.tmp', examUrl);
                     } catch (e) {}
@@ -229,4 +255,23 @@ Then('the faculty extracts and saves the shareable public assessment link', asyn
             }
         }
     }
+});
+
+// Scenario 3: Candidate Exam Attempt
+Given('candidate navigates to the saved published assessment link', async () => {
+    const actor = actorInTheSpotlight();
+    const baseUrl = getBaseUrl();
+    let targetUrl = `${baseUrl}/public`;
+    try {
+        if (fs.existsSync('.shareable_exam_link.tmp')) {
+            let savedUrl = fs.readFileSync('.shareable_exam_link.tmp', 'utf-8').trim();
+            if (process.env.ENVIRONMENT === 'uat' || process.env.ENVIRONMENT === 'qa') {
+                savedUrl = savedUrl.replace('http://localhost:3000', 'https://uat.quickexamcreator.com');
+            }
+            targetUrl = savedUrl;
+        }
+    } catch (e) {}
+    await actor.attemptsTo(
+        Navigate.to(targetUrl)
+    );
 });

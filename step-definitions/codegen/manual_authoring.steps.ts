@@ -156,18 +156,6 @@ Then('the user extracts and saves the published assessment link', async () => {
     }
 });
 
-Given('candidate navigates to the saved published assessment link', async () => {
-    const actor = actorInTheSpotlight();
-    let targetUrl = 'http://localhost:3000/public';
-    try {
-        if (require('fs').existsSync('.shareable_exam_link.tmp')) {
-            targetUrl = require('fs').readFileSync('.shareable_exam_link.tmp', 'utf-8').trim();
-        }
-    } catch (e) {}
-    await actor.attemptsTo(
-        Navigate.to(targetUrl)
-    );
-});
 
 When('the user takes the published assessment as a candidate', async () => {
     const page = getPage();

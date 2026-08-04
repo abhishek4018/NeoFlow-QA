@@ -6,7 +6,7 @@ Feature: Complete Pariksha Public Workflow Lifecycle
 
   @public-complete-flow @codegen @e2e @scenario-1
   Scenario: Faculty generates questions via AI Quick Generator and dispatches magic link
-    Given the faculty opens the Pariksha Public Workspace at "http://localhost:3000/public"
+    Given the faculty opens the Pariksha Public Workspace
     When the user clicks sample material button "Cell Biology Quiz"
     And the faculty clicks the Generate Question Set button
     And the faculty proceeds to the Workspace Dashboard
