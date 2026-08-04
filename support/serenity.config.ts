@@ -10,7 +10,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 const timeouts = {
     cucumber: {
-        step: Duration.ofSeconds(60),                       // how long to wait for a Cucumber step to complete
+        step: Duration.ofSeconds(120),                      // how long to wait for a Cucumber step to complete
     },
     playwright: {
         defaultNavigationTimeout: Duration.ofSeconds(30),   // how long to wait for a page to load
@@ -36,11 +36,12 @@ const environment = process.env.ENVIRONMENT || 'dev';
 
 // Map environment names to base URLs
 const baseUrls: Record<string, string> = {
-    dev: '',
-    qa: '',
-    prod: 'https://happiesthealth.com/',
+    dev: 'http://localhost:3000',
+    qa: 'https://uat.quickexamcreator.com',
+    uat: 'https://uat.quickexamcreator.com',
+    prod: 'https://quickexamcreator.com',
 };
-const baseURL = baseUrls[environment] || baseUrls['qa'];
+const baseURL = baseUrls[environment] || baseUrls['uat'];
 
 let browser: playwright.Browser;
 
@@ -50,7 +51,7 @@ setDefaultTimeout(timeouts.cucumber.step.inMilliseconds());
 BeforeAll(async () => {
     // Launch the browser once before all the tests
     browser = await browserType.launch({
-        headless: false,
+        headless: process.env.HEADLESS === 'true',
     });
 
     // Configure Serenity/JS

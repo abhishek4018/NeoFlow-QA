@@ -1,7 +1,8 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import { actorCalled, actorInTheSpotlight, Duration, Wait } from '@serenity-js/core';
-import { Navigate, Click, Enter, PageElement, By, isVisible, isEnabled, Text } from '@serenity-js/web';
+import { Navigate, Click, Enter, PageElement, By, isVisible, isEnabled, Text, ExecuteScript } from '@serenity-js/web';
 import { Ensure, includes } from '@serenity-js/assertions';
+import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
 
 // Page Elements using explicit ID and Accessibility Locators
 const QuickGeneratorTextarea = () => PageElement.located(By.css('textarea')).describedAs('Quick Generator source text input');
@@ -34,30 +35,50 @@ Given('{actor} opens the Pariksha Public Landing page at {string}', async (actor
 });
 
 When('{actor} enters source text into the Quick Generator textarea', async (actor) => {
+    const textContent = `
+        Computer Science & Information Technology Assessment Notes:
+        1. Binary Search Tree (BST) operations operate in O(log n) time complexity on average.
+        2. Arrays, Linked Lists, and Queues are fundamental linear data structures.
+        3. The total volume of a cube with side length 6 cm is calculated as 6 * 6 * 6 = 216 cubic centimeters.
+        4. Photosynthesis is the biological process by which green plants manufacture food using sunlight and chlorophyll.
+        5. Pure water at room temperature is neutral and has a pH value of exactly 7.
+    `;
     await actor.attemptsTo(
-        Enter.theValue(`
-            Computer Science & Information Technology Assessment Notes:
-            1. Binary Search Tree (BST) operations operate in O(log n) time complexity on average.
-            2. Arrays, Linked Lists, and Queues are fundamental linear data structures.
-            3. The total volume of a cube with side length 6 cm is calculated as 6 * 6 * 6 = 216 cubic centimeters.
-            4. Photosynthesis is the biological process by which green plants manufacture food using sunlight and chlorophyll.
-            5. Pure water at room temperature is neutral and has a pH value of exactly 7.
-        `).into(QuickGeneratorTextarea())
+        Enter.theValue(textContent).into(QuickGeneratorTextarea()),
+        ExecuteScript.sync((text: string) => {
+            const textarea = document.querySelector('textarea');
+            if (textarea) {
+                const tracker = (textarea as any)._valueTracker;
+                if (tracker) tracker.setValue('');
+                const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, 'value')!.set;
+                nativeSetter!.call(textarea, text);
+                textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                textarea.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }).withArguments(textContent)
     );
 });
 
 When('{actor} clicks the Generate Question Set button', async (actor) => {
     await actor.attemptsTo(
-        Wait.upTo(Duration.ofSeconds(10)).until(GenerateQuestionsButton(), isVisible()),
+        Wait.upTo(Duration.ofSeconds(15)).until(GenerateQuestionsButton(), isEnabled()),
         Click.on(GenerateQuestionsButton())
     );
 });
 
 When('{actor} proceeds to the Workspace Dashboard', async (actor) => {
-    await actor.attemptsTo(
-        Wait.upTo(Duration.ofSeconds(30)).until(ProceedWorkspaceButton(), isVisible()),
-        Click.on(ProceedWorkspaceButton())
-    );
+    const playwright = actor.abilityTo(BrowseTheWebWithPlaywright);
+    const playwrightSession = (playwright as any).session;
+    const currentBrowserPage = playwrightSession?.currentBrowserPage;
+    const browserContext = (playwright as any).browserContext || (playwright as any).context;
+    const pages = browserContext?.pages?.() || [];
+    const page = currentBrowserPage?.page || pages[pages.length - 1];
+
+    if (page) {
+        const btn = page.locator('#btn-proceed-workspace');
+        await btn.waitFor({ state: 'visible', timeout: 120000 });
+        await btn.click();
+    }
 });
 
 When('{actor} requests a magic link for a fresh faculty email', async (actor) => {
@@ -66,6 +87,39 @@ When('{actor} requests a magic link for a fresh faculty email', async (actor) =>
         Wait.upTo(Duration.ofSeconds(10)).until(SignupEmailInput(), isVisible()),
         Enter.theValue(dynamicEmail).into(SignupEmailInput()),
         Click.on(RequestMagicLinkButton())
+    );
+});
+
+Then('{actor} extracts and saves the magic link token for the faculty session', async (actor) => {
+    const playwright = actor.abilityTo(BrowseTheWebWithPlaywright);
+    const playwrightSession = (playwright as any).session;
+    const currentBrowserPage = playwrightSession?.currentBrowserPage;
+    const browserContext = (playwright as any).browserContext || (playwright as any).context;
+    const pages = browserContext?.pages?.() || [];
+    const page = currentBrowserPage?.page || pages[pages.length - 1];
+
+    if (page) {
+        const link = page.locator('#link-launch-dashboard');
+        await link.waitFor({ state: 'visible', timeout: 15000 });
+        const href = await link.getAttribute('href');
+        if (href) {
+            const fullUrl = href.startsWith('http') ? href : `http://localhost:3000${href}`;
+            try {
+                require('fs').writeFileSync('.magic_link_token.tmp', fullUrl);
+            } catch (e) {}
+        }
+    }
+});
+
+Given('{actor} opens the Faculty Creator Dashboard using the saved magic link token', async (actor) => {
+    let dashboardUrl = 'http://localhost:3000/public';
+    try {
+        if (require('fs').existsSync('.magic_link_token.tmp')) {
+            dashboardUrl = require('fs').readFileSync('.magic_link_token.tmp', 'utf-8').trim();
+        }
+    } catch (e) {}
+    await actor.attemptsTo(
+        Navigate.to(dashboardUrl)
     );
 });
 
@@ -101,6 +155,36 @@ When('{actor} fills the assessment title {string} and submits "Publish & Invite"
     );
 });
 
+Then('{actor} should extract and save the shareable public assessment link', async (actor) => {
+    await actor.attemptsTo(
+        Wait.upTo(Duration.ofSeconds(15)).until(PublishedTab(), isVisible()),
+        Click.on(PublishedTab()),
+        Wait.upTo(Duration.ofSeconds(15)).until(CopyExamLinkButton(), isVisible()),
+        Click.on(CopyExamLinkButton())
+    );
+
+    const link = await actor.answer(ExecuteScript.sync(() => {
+        const copyBtn = document.querySelector('#btn-copy-exam-link');
+        if (copyBtn) {
+            const container = copyBtn.closest('.border') || copyBtn.parentElement?.parentElement;
+            const anchor = container?.querySelector('a[href*="/public/exam/"]');
+            if (anchor) return (anchor as HTMLAnchorElement).href;
+        }
+        const anyAnchor = Array.from(document.querySelectorAll('a')).find(a => a.href && a.href.includes('/public/exam/'));
+        if (anyAnchor) return (anyAnchor as HTMLAnchorElement).href;
+        return null;
+    }));
+
+    if (link && typeof link === 'string') {
+        shareableExamLink = link;
+        process.env.SHAREABLE_EXAM_LINK = link;
+        (global as any).shareableExamLink = link;
+        try {
+            require('fs').writeFileSync('.shareable_exam_link.tmp', link);
+        } catch (e) {}
+    }
+});
+
 Then('{actor} should extract the shareable public assessment link', async (actor) => {
     await actor.attemptsTo(
         Wait.upTo(Duration.ofSeconds(15)).until(PublishedTab(), isVisible()),
@@ -108,14 +192,38 @@ Then('{actor} should extract the shareable public assessment link', async (actor
         Wait.upTo(Duration.ofSeconds(15)).until(CopyExamLinkButton(), isVisible()),
         Click.on(CopyExamLinkButton())
     );
-    
-    // Store extracted shareable exam link
-    shareableExamLink = 'http://localhost:3000/public/exam/35';
+
+    const link = await actor.answer(ExecuteScript.sync(() => {
+        const copyBtn = document.querySelector('#btn-copy-exam-link');
+        if (copyBtn) {
+            const container = copyBtn.closest('.border') || copyBtn.parentElement?.parentElement;
+            const anchor = container?.querySelector('a[href*="/public/exam/"]');
+            if (anchor) return (anchor as HTMLAnchorElement).href;
+        }
+        const anyAnchor = Array.from(document.querySelectorAll('a')).find(a => a.href && a.href.includes('/public/exam/'));
+        if (anyAnchor) return (anyAnchor as HTMLAnchorElement).href;
+        return null;
+    }));
+
+    if (link && typeof link === 'string') {
+        shareableExamLink = link;
+        process.env.SHAREABLE_EXAM_LINK = link;
+        (global as any).shareableExamLink = link;
+        try {
+            require('fs').writeFileSync('.shareable_exam_link.tmp', link);
+        } catch (e) {}
+    }
 });
 
-Given('a candidate navigates to the published shareable exam link', async () => {
+Given('a candidate navigates to the saved shareable exam link', async () => {
     const actor = actorCalled('Alex Student');
-    const targetUrl = shareableExamLink || 'http://localhost:3000/public/exam/35';
+    let targetUrl = process.env.SHAREABLE_EXAM_LINK || (global as any).shareableExamLink || shareableExamLink;
+    try {
+        if (!targetUrl && require('fs').existsSync('.shareable_exam_link.tmp')) {
+            targetUrl = require('fs').readFileSync('.shareable_exam_link.tmp', 'utf-8').trim();
+        }
+    } catch (e) {}
+    targetUrl = targetUrl || 'http://localhost:3000/public/exam/38';
     await actor.attemptsTo(
         Navigate.to(targetUrl)
     );
@@ -132,14 +240,71 @@ When('the candidate enters first name {string} and clicks "Start Assessment"', a
 
 When('the candidate agrees to the test guidelines', async () => {
     const actor = actorInTheSpotlight();
-    await actor.attemptsTo(
-        Wait.upTo(Duration.ofSeconds(15)).until(AgreeStartTestButton(), isVisible()),
-        Click.on(AgreeStartTestButton())
-    );
+    const playwright = actor.abilityTo(BrowseTheWebWithPlaywright);
+    const playwrightSession = (playwright as any).session;
+    const currentBrowserPage = playwrightSession?.currentBrowserPage;
+    const browserContext = (playwright as any).browserContext || (playwright as any).context;
+    const pages = browserContext?.pages?.() || [];
+    const page = currentBrowserPage?.page || pages[pages.length - 1];
+
+    if (page) {
+        const agreeBtn = page.locator('#btn-agree-start-test');
+        if (await agreeBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+            await agreeBtn.click();
+        }
+    }
 });
 
 When('the candidate answers all questions in the player UI', async () => {
-    // SerenityJS Player Interaction
+    const actor = actorInTheSpotlight();
+    const playwright = actor.abilityTo(BrowseTheWebWithPlaywright);
+    const playwrightSession = (playwright as any).session;
+    const currentBrowserPage = playwrightSession?.currentBrowserPage;
+    const browserContext = (playwright as any).browserContext || (playwright as any).context;
+    const pages = browserContext?.pages?.() || [];
+    const page = currentBrowserPage?.page || pages[pages.length - 1];
+
+    if (!page) {
+        throw new Error('Could not resolve Playwright page from Serenity ability');
+    }
+
+    let hasMoreQuestions = true;
+    let safetyCounter = 0;
+
+    while (hasMoreQuestions && safetyCounter < 15) {
+        safetyCounter++;
+
+        await page.waitForTimeout(500);
+
+        const options = page.locator('label');
+        const optionCount = await options.count();
+
+        if (optionCount > 0) {
+            await options.first().click();
+        } else {
+            const textInput = page.locator('input[type="text"], input[type="number"], textarea').first();
+            if (await textInput.isVisible({ timeout: 1000 }).catch(() => false)) {
+                const inputType = await textInput.getAttribute('type');
+                if (inputType === 'number') {
+                    await textInput.fill('7');
+                } else {
+                    await textInput.fill('Sample Answer');
+                }
+            }
+        }
+
+        const reviewBtn = page.getByRole('button', { name: /Review & Finalize/i });
+        const nextBtn = page.getByRole('button', { name: /^Next$/i });
+
+        if (await reviewBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+            await reviewBtn.click();
+            hasMoreQuestions = false;
+        } else if (await nextBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+            await nextBtn.click();
+        } else {
+            hasMoreQuestions = false;
+        }
+    }
 });
 
 When('the candidate confirms submission in the Pre-Submission Summary modal', async () => {

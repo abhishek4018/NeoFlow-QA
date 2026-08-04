@@ -1,6 +1,7 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import { actorInTheSpotlight } from '@serenity-js/core';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
+import { Navigate } from '@serenity-js/web';
 
 function normalizeText(value: string): string {
     return value.trim().toLowerCase();
@@ -74,6 +75,30 @@ When('the user opens the creator dashboard from the magic link', async () => {
     await page.goto(fullUrl, { waitUntil: 'networkidle', timeout: 120000 });
 });
 
+Then('the user extracts and saves the magic link token', async () => {
+    const page = getPage();
+    const link = await page.locator('a', { hasText: /launch creator dashboard/i }).first().getAttribute('href');
+    if (link) {
+        const fullUrl = link.startsWith('http') ? link : `http://localhost:3000${link}`;
+        try {
+            require('fs').writeFileSync('.magic_link_token.tmp', fullUrl);
+        } catch (e) {}
+    }
+});
+
+Given('the user opens the creator dashboard using the saved magic link token', async () => {
+    const actor = actorInTheSpotlight();
+    let dashboardUrl = 'http://localhost:3000/public';
+    try {
+        if (require('fs').existsSync('.magic_link_token.tmp')) {
+            dashboardUrl = require('fs').readFileSync('.magic_link_token.tmp', 'utf-8').trim();
+        }
+    } catch (e) {}
+    await actor.attemptsTo(
+        Navigate.to(dashboardUrl)
+    );
+});
+
 When('the user approves the pending question from the dashboard', async () => {
     const page = getPage();
     const approveButtons = page.getByRole('button', { name: /^Approve$/i });
@@ -88,14 +113,60 @@ When('the user creates an assessment from the approved question bank', async () 
     const button = page.getByRole('button', { name: /question bank/i });
     if (await button.count()) {
         await button.first().click();
-        await page.waitForTimeout(3000);
+        await page.waitForTimeout(2000);
     }
 
-    const createAssessmentButton = page.getByRole('button', { name: /create assessment|publish/i });
+    const createAssessmentButton = page.getByRole('button', { name: /publish assessment|create assessment/i });
     if (await createAssessmentButton.count()) {
         await createAssessmentButton.first().click();
+        await page.waitForTimeout(2000);
+    }
+
+    const titleInput = page.locator('#input-exam-title, input[placeholder*="Title"]');
+    if (await titleInput.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await titleInput.fill('Algorithms Midterm Exam');
+    }
+
+    const confirmPublishBtn = page.locator('#btn-confirm-publish-invite, button:has-text("Publish & Invite")');
+    if (await confirmPublishBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await confirmPublishBtn.click();
         await page.waitForTimeout(4000);
     }
+});
+
+Then('the user extracts and saves the published assessment link', async () => {
+    const page = getPage();
+    const publishedTab = page.locator('#tab-published-assessments');
+    if (await publishedTab.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await publishedTab.click();
+        await page.waitForTimeout(2000);
+    }
+    const resultsLink = page.locator('a[href*="/public/exam/"]').first();
+    if (await resultsLink.count()) {
+        const href = await resultsLink.getAttribute('href');
+        if (href) {
+            const match = href.match(/\/public\/exam\/(\d+)/);
+            if (match) {
+                const examUrl = `http://localhost:3000/public/exam/${match[1]}`;
+                try {
+                    require('fs').writeFileSync('.shareable_exam_link.tmp', examUrl);
+                } catch (e) {}
+            }
+        }
+    }
+});
+
+Given('candidate navigates to the saved published assessment link', async () => {
+    const actor = actorInTheSpotlight();
+    let targetUrl = 'http://localhost:3000/public';
+    try {
+        if (require('fs').existsSync('.shareable_exam_link.tmp')) {
+            targetUrl = require('fs').readFileSync('.shareable_exam_link.tmp', 'utf-8').trim();
+        }
+    } catch (e) {}
+    await actor.attemptsTo(
+        Navigate.to(targetUrl)
+    );
 });
 
 When('the user takes the published assessment as a candidate', async () => {
