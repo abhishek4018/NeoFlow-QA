@@ -15,10 +15,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js (v24)
+      - name: Set up Node.js (v20)
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
           cache: 'npm'
 
       - name: Install Dependencies & Playwright Chromium
@@ -30,6 +30,7 @@ jobs:
         env:
           ENVIRONMENT: uat
           BASE_URL: https://uat.quickexamcreator.com
+          HEADLESS: "true"
         run: |
           npm run test:smoke
 
