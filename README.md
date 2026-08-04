@@ -141,10 +141,10 @@ To run **only tagged** scenarios and then the report (equivalent pieces of `npm 
 
 ### Mac/Linux (bash, zsh, etc.)
 ```sh
-# Pariksha UAT @smoke Test Suite Execution & Serenity Report Generation:
-ENVIRONMENT=uat npx cucumber-js --tags "@smoke" && npm run test:report
+# Pariksha UAT @smoke Test Suite Execution (Wipes old target data, runs @smoke on UAT, generates Serenity report):
+ENVIRONMENT=uat npm run test:smoke
 
-# Serve the Serenity BDD HTML report at http://localhost:8080
+# Serve the clean Serenity BDD HTML report at http://localhost:8080
 npm start
 ```
 
