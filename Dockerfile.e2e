@@ -1,5 +1,4 @@
-# Dockerfile for Pariksha Serenity/JS E2E Automation Runner (Option 3)
-FROM mcr.microsoft.com/playwright:v1.47.0-jammy
+FROM mcr.microsoft.com/playwright:v1.59.1-jammy
 
 # Set working directory
 WORKDIR /app
