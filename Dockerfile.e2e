@@ -20,4 +20,4 @@ ENV HEADLESS=true
 RUN mkdir -p target/site/serenity
 
 # Entrypoint to execute Cucumber test suite and compile Serenity BDD HTML report
-CMD ["sh", "-c", "npx cucumber-js features/codegen/pariksha_public_complete_flow.feature && npm run test:report"]
+CMD ["sh", "-c", "npx cucumber-js --tags \"@smoke\" && npm run test:report"]

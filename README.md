@@ -141,7 +141,11 @@ To run **only tagged** scenarios and then the report (equivalent pieces of `npm 
 
 ### Mac/Linux (bash, zsh, etc.)
 ```sh
-npm run clean; BROWSER=firefox ENVIRONMENT=prod npx cucumber-js --profile default --tags "@redbus-scenario"; npx serenity-bdd run --features ./features
+# Pariksha UAT @smoke Test Suite Execution & Serenity Report Generation:
+ENVIRONMENT=uat npx cucumber-js --tags "@smoke" && npm run test:report
+
+# Serve the Serenity BDD HTML report at http://localhost:8080
+npm start
 ```
 
 ### Windows Command Prompt (cmd.exe)
