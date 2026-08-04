@@ -5,9 +5,6 @@ on:
     branches: [ "pariksha", "main" ]
   pull_request:
     branches: [ "pariksha", "main" ]
-env:
-  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
-
 jobs:
   run-e2e-smoke-tests:
     name: Run E2E Smoke Tests on UAT
@@ -16,10 +13,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js (v20)
+      - name: Set up Node.js (v24)
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: 'npm'
 
       - name: Install Dependencies & Playwright Chromium
