@@ -17,3 +17,4 @@ target
 
 # Local environment variables
 .env
+*.tmp

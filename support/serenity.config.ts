@@ -51,7 +51,7 @@ setDefaultTimeout(timeouts.cucumber.step.inMilliseconds());
 BeforeAll(async () => {
     // Launch the browser once before all the tests
     browser = await browserType.launch({
-        headless: process.env.HEADLESS === 'true',
+        headless: process.env.HEADLESS?.toLowerCase() !== 'false',
     });
 
     // Configure Serenity/JS

@@ -1,6 +1,5 @@
 # Serenity/JS Cucumber Playwright Template
 
-
 ### Installation
 
 Once you have the code on your computer, run the following in the project directory:
@@ -85,6 +84,7 @@ Example `.env` values:
 USE_LAMBDATEST=false
 BROWSER=chromium
 ENVIRONMENT=qa
+HEADLESS=false
 
 # LambdaTest credentials and capability overrides (optional)
 # LT_USERNAME=YOUR_LAMBDATEST_USERNAME
@@ -116,10 +116,10 @@ BROWSER=webkit ENVIRONMENT=prod npx cucumber-js --tags "@regression"
 
 ### Windows: environment variables and Cucumber (examples)
 
-| Shell        | Command |
-| ------------ | ------- |
-| cmd.exe      | `set BROWSER=firefox && set ENVIRONMENT=dev && npx cucumber-js --profile default --tags "@MyTest"` |
-| PowerShell   | `$env:BROWSER="firefox"; $env:ENVIRONMENT="dev"; npx cucumber-js --profile default --tags "@MyTest"` |
+| Shell      | Command                                                                                                |
+| ---------- | ------------------------------------------------------------------------------------------------------ |
+| cmd.exe    | `set BROWSER=firefox && set ENVIRONMENT=dev && npx cucumber-js --profile default --tags "@MyTest"`   |
+| PowerShell | `$env:BROWSER="firefox"; $env:ENVIRONMENT="dev"; npx cucumber-js --profile default --tags "@MyTest"` |
 
 **cmd.exe** (run tests and Serenity BDD report):
 
@@ -140,20 +140,25 @@ $env:BROWSER="firefox"; $env:ENVIRONMENT="prod"; npx cucumber-js --profile defau
 To run **only tagged** scenarios and then the report (equivalent pieces of `npm test`, but filtered):
 
 ### Mac/Linux (bash, zsh, etc.)
+
 ```sh
 # Pariksha UAT @smoke Test Suite Execution (Wipes old target data, runs @smoke on UAT, generates Serenity report):
 ENVIRONMENT=uat npm run test:smoke
 
 # Serve the clean Serenity BDD HTML report at http://localhost:8080
 npm start
+
+npm run clean && HEADLESS=false BROWSER=chrome ENVIRONMENT=dev npx cucumber-js --tags "@smoke" && npx serenity-bdd run --features ./features
 ```
 
 ### Windows Command Prompt (cmd.exe)
+
 ```cmd
 npm run clean & set BROWSER=firefox & set ENVIRONMENT=prod & npx cucumber-js --profile default --tags "@redbus-scenario" & npx serenity-bdd run --features ./features
 ```
 
 ### Windows PowerShell
+
 ```powershell
 npm run clean; $env:BROWSER="firefox"; $env:ENVIRONMENT="prod"; npx cucumber-js --profile default --tags "@HappiestHealthHome"; npx serenity-bdd run --features ./features
 ```
