@@ -6,7 +6,7 @@ Feature: Pariksha Assessment Engine Pure UI E2E Workflows
 
   @pure_ui @e2e @faculty
   Scenario: Faculty creates questions via AI Quick Generator and dispatches magic link
-    Given Alex opens the Pariksha Public Landing page at "http://localhost:3000/public"
+    Given Alex opens the Pariksha Public Landing page at "/public"
     When Alex enters source text into the Quick Generator textarea
     And Alex clicks the Generate Question Set button
     And Alex proceeds to the Workspace Dashboard
