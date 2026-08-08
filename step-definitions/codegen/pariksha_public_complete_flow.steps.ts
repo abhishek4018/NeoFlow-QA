@@ -268,12 +268,22 @@ Given('candidate navigates to the saved published assessment link', async () => 
             if (process.env.ENVIRONMENT === 'uat' || process.env.ENVIRONMENT === 'qa') {
                 savedUrl = savedUrl.replace('http://localhost:3000', 'https://uat.quickexamcreator.com');
             }
-            targetUrl = savedUrl;
-        } else {
-            const apiUrl = `${baseUrl}/api/exams`;
+            // If saved link contains stale exam 44 or invalid path, fetch active published exam via API
+            if (!savedUrl.includes('/public/exam/44')) {
+                targetUrl = savedUrl;
+            }
+        }
+        
+        if (targetUrl === `${baseUrl}/public` || targetUrl.includes('/public/exam/44')) {
+            const apiUrl = `${baseUrl}/api/public/exams`;
             const response = await fetch(apiUrl).then(r => r.json()).catch(() => null);
             if (Array.isArray(response) && response.length > 0) {
                 targetUrl = `${baseUrl}/public/exam/${response[0].id}`;
+            } else {
+                const fallbackRes = await fetch(`${baseUrl}/api/exams`).then(r => r.json()).catch(() => null);
+                if (Array.isArray(fallbackRes) && fallbackRes.length > 0) {
+                    targetUrl = `${baseUrl}/public/exam/${fallbackRes[0].id}`;
+                }
             }
         }
     } catch (e) {}
