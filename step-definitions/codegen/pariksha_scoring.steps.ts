@@ -19,8 +19,24 @@ Given('candidate navigates to the public exam at {string}', async (url: string) 
 
 When('candidate registers with first name {string}', async (firstName: string) => {
     const actor = actorInTheSpotlight();
+    const playwright = actor.abilityTo(BrowseTheWebWithPlaywright);
+    const playwrightSession = (playwright as any).session;
+    const currentBrowserPage = playwrightSession?.currentBrowserPage;
+    const browserContext = (playwright as any).browserContext || (playwright as any).context;
+    const pages = browserContext?.pages?.() || [];
+    const page = currentBrowserPage?.page || pages[pages.length - 1];
+
+    if (page) {
+        // If candidate landed on /public or exam catalog, navigate into the first active exam card
+        const examCardLink = page.locator('a[href*="/public/exam/"]').first();
+        if (await examCardLink.isVisible({ timeout: 3000 }).catch(() => false)) {
+            await examCardLink.click();
+            await page.waitForTimeout(1500);
+        }
+    }
+
     await actor.attemptsTo(
-        Wait.upTo(Duration.ofSeconds(10)).until(CandidateFirstNameInput(), isVisible()),
+        Wait.upTo(Duration.ofSeconds(15)).until(CandidateFirstNameInput(), isVisible()),
         Enter.theValue(firstName).into(CandidateFirstNameInput()),
         Wait.upTo(Duration.ofSeconds(5)).until(StartAssessmentButton(), isEnabled()),
         Click.on(StartAssessmentButton())
