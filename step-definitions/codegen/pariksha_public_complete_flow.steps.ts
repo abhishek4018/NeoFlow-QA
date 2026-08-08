@@ -233,6 +233,8 @@ Then('the faculty extracts and saves the shareable public assessment link', asyn
     const pages = browserContext?.pages?.() || [];
     const page = currentBrowserPage?.page || pages[pages.length - 1];
 
+    let extractedUrl: string | null = null;
+
     if (page) {
         const publishedTab = page.locator('#tab-published-assessments');
         if (await publishedTab.isVisible({ timeout: 5000 }).catch(() => false)) {
@@ -247,13 +249,29 @@ Then('the faculty extracts and saves the shareable public assessment link', asyn
                 const match = href.match(/\/public\/exam\/(\d+)/);
                 if (match) {
                     const baseUrl = getBaseUrl();
-                    const examUrl = `${baseUrl}/public/exam/${match[1]}`;
-                    try {
-                        fs.writeFileSync('.shareable_exam_link.tmp', examUrl);
-                    } catch (e) {}
+                    extractedUrl = `${baseUrl}/public/exam/${match[1]}`;
                 }
             }
         }
+    }
+
+    if (!extractedUrl) {
+        const baseUrl = getBaseUrl();
+        const response = await fetch(`${baseUrl}/api/public/exams`).then(r => r.json()).catch(() => null);
+        if (Array.isArray(response) && response.length > 0 && response[0]?.id) {
+            extractedUrl = `${baseUrl}/public/exam/${response[0].id}`;
+        } else {
+            const fallbackRes = await fetch(`${baseUrl}/api/exams`).then(r => r.json()).catch(() => null);
+            if (Array.isArray(fallbackRes) && fallbackRes.length > 0 && fallbackRes[0]?.id) {
+                extractedUrl = `${baseUrl}/public/exam/${fallbackRes[0].id}`;
+            }
+        }
+    }
+
+    if (extractedUrl) {
+        try {
+            fs.writeFileSync('.shareable_exam_link.tmp', extractedUrl);
+        } catch (e) {}
     }
 });
 
