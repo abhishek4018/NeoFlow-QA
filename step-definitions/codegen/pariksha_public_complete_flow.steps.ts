@@ -297,17 +297,23 @@ Given('candidate navigates to the saved published assessment link', async () => 
                 }
             }
 
-            // Fallback: Query backend API for newly created active exam ID
+            // Fallback: Query backend API for newly created active exam ID (sort descending to get newest)
             const apiUrl = `${baseUrl}/api/public/exams`;
             const response = await fetch(apiUrl).then(r => r.json()).catch(() => null);
-            if (Array.isArray(response) && response.length > 0 && response[0]?.id) {
-                targetUrl = `${baseUrl}/public/exam/${response[0].id}`;
-                break;
+            if (Array.isArray(response) && response.length > 0) {
+                const newestExam = response.sort((a: any, b: any) => b.id - a.id)[0];
+                if (newestExam?.id) {
+                    targetUrl = `${baseUrl}/public/exam/${newestExam.id}`;
+                    break;
+                }
             } else {
                 const fallbackRes = await fetch(`${baseUrl}/api/exams`).then(r => r.json()).catch(() => null);
-                if (Array.isArray(fallbackRes) && fallbackRes.length > 0 && fallbackRes[0]?.id) {
-                    targetUrl = `${baseUrl}/public/exam/${fallbackRes[0].id}`;
-                    break;
+                if (Array.isArray(fallbackRes) && fallbackRes.length > 0) {
+                    const newestExam = fallbackRes.sort((a: any, b: any) => b.id - a.id)[0];
+                    if (newestExam?.id) {
+                        targetUrl = `${baseUrl}/public/exam/${newestExam.id}`;
+                        break;
+                    }
                 }
             }
         } catch (e) {}
