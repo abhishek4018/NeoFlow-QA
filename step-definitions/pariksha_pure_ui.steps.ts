@@ -318,6 +318,6 @@ When('the candidate confirms submission in the Pre-Submission Summary modal', as
 Then('the candidate should see their final pedagogical score on the Results view', async () => {
     const actor = actorInTheSpotlight();
     await actor.attemptsTo(
-        Ensure.that(Text.of(PageElement.located(By.css('body'))), includes('Pariksha'))
+        Ensure.that(Text.of(PageElement.located(By.css('body'))), includes('Vatra'))
     );
 });
