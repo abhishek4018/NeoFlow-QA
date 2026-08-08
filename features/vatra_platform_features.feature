@@ -19,3 +19,19 @@ Feature: VATRA Master Branding, Stakeholder Pillars & DPDP Persistence
     When Alex clicks "Accept & Continue" on the DPDP consent banner
     Then the DPDP consent cookie "vatra_dpdp_consent" should be set
     And refreshing the page should keep the consent banner hidden
+
+  @vatra @analytics @e2e
+  Scenario: Faculty dashboard displays live assessment statistics
+    Given Alex navigates to faculty dashboard "/faculty/dashboard"
+    Then Alex should see statistics cards for active exams, completed attempts, and average score
+
+  @vatra @blooms_results @e2e
+  Scenario: Candidate results view displays Bloom's cognitive score breakdown
+    Given Alex navigates to student results page "/public/exam/1/results"
+    Then Alex should see pedagogical score results and Bloom's cognitive feedback
+
+  @vatra @dpdp_audit_api @e2e
+  Scenario: DPDP consent API endpoint records consent with proxy IP extraction
+    Given Alex posts DPDP consent payload to "/api/auth/consent"
+    Then the API should respond with status "recorded" and client IP address
+
