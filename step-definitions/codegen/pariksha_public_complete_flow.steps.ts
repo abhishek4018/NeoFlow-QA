@@ -258,12 +258,18 @@ Then('the faculty extracts and saves the shareable public assessment link', asyn
     if (!extractedUrl) {
         const baseUrl = getBaseUrl();
         const response = await fetch(`${baseUrl}/api/public/exams`).then(r => r.json()).catch(() => null);
-        if (Array.isArray(response) && response.length > 0 && response[0]?.id) {
-            extractedUrl = `${baseUrl}/public/exam/${response[0].id}`;
+        if (Array.isArray(response) && response.length > 0) {
+            const newestExam = response.sort((a: any, b: any) => b.id - a.id)[0];
+            if (newestExam?.id) {
+                extractedUrl = `${baseUrl}/public/exam/${newestExam.id}`;
+            }
         } else {
             const fallbackRes = await fetch(`${baseUrl}/api/exams`).then(r => r.json()).catch(() => null);
-            if (Array.isArray(fallbackRes) && fallbackRes.length > 0 && fallbackRes[0]?.id) {
-                extractedUrl = `${baseUrl}/public/exam/${fallbackRes[0].id}`;
+            if (Array.isArray(fallbackRes) && fallbackRes.length > 0) {
+                const newestExam = fallbackRes.sort((a: any, b: any) => b.id - a.id)[0];
+                if (newestExam?.id) {
+                    extractedUrl = `${baseUrl}/public/exam/${newestExam.id}`;
+                }
             }
         }
     }
