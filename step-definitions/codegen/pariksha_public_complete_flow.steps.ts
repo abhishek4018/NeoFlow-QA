@@ -262,31 +262,41 @@ Given('candidate navigates to the saved published assessment link', async () => 
     const actor = actorInTheSpotlight();
     const baseUrl = getBaseUrl();
     let targetUrl = `${baseUrl}/public`;
-    try {
-        if (fs.existsSync('.shareable_exam_link.tmp')) {
-            let savedUrl = fs.readFileSync('.shareable_exam_link.tmp', 'utf-8').trim();
-            if (process.env.ENVIRONMENT === 'uat' || process.env.ENVIRONMENT === 'qa') {
-                savedUrl = savedUrl.replace('http://localhost:3000', 'https://uat.quickexamcreator.com');
-            }
-            // If saved link contains stale exam 44 or invalid path, fetch active published exam via API
-            if (!savedUrl.includes('/public/exam/44')) {
-                targetUrl = savedUrl;
-            }
-        }
-        
-        if (targetUrl === `${baseUrl}/public` || targetUrl.includes('/public/exam/44')) {
-            const apiUrl = `${baseUrl}/api/public/exams`;
-            const response = await fetch(apiUrl).then(r => r.json()).catch(() => null);
-            if (Array.isArray(response) && response.length > 0) {
-                targetUrl = `${baseUrl}/public/exam/${response[0].id}`;
-            } else {
-                const fallbackRes = await fetch(`${baseUrl}/api/exams`).then(r => r.json()).catch(() => null);
-                if (Array.isArray(fallbackRes) && fallbackRes.length > 0) {
-                    targetUrl = `${baseUrl}/public/exam/${fallbackRes[0].id}`;
+
+    const startTime = Date.now();
+    const maxWaitMs = 30000; // 30-second retry loop
+
+    while (Date.now() - startTime < maxWaitMs) {
+        try {
+            if (fs.existsSync('.shareable_exam_link.tmp')) {
+                let savedUrl = fs.readFileSync('.shareable_exam_link.tmp', 'utf-8').trim();
+                if (savedUrl && savedUrl.includes('/public/exam/')) {
+                    if (process.env.ENVIRONMENT === 'uat' || process.env.ENVIRONMENT === 'qa') {
+                        savedUrl = savedUrl.replace('http://localhost:3000', 'https://uat.quickexamcreator.com');
+                    }
+                    targetUrl = savedUrl;
+                    break;
                 }
             }
-        }
-    } catch (e) {}
+
+            // Fallback: Query backend API for newly created active exam ID
+            const apiUrl = `${baseUrl}/api/public/exams`;
+            const response = await fetch(apiUrl).then(r => r.json()).catch(() => null);
+            if (Array.isArray(response) && response.length > 0 && response[0]?.id) {
+                targetUrl = `${baseUrl}/public/exam/${response[0].id}`;
+                break;
+            } else {
+                const fallbackRes = await fetch(`${baseUrl}/api/exams`).then(r => r.json()).catch(() => null);
+                if (Array.isArray(fallbackRes) && fallbackRes.length > 0 && fallbackRes[0]?.id) {
+                    targetUrl = `${baseUrl}/public/exam/${fallbackRes[0].id}`;
+                    break;
+                }
+            }
+        } catch (e) {}
+
+        await new Promise(resolve => setTimeout(resolve, 3000));
+    }
+
     await actor.attemptsTo(
         Navigate.to(targetUrl)
     );

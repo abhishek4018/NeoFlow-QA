@@ -223,7 +223,7 @@ Given('a candidate navigates to the saved shareable exam link', async () => {
             targetUrl = require('fs').readFileSync('.shareable_exam_link.tmp', 'utf-8').trim();
         }
     } catch (e) {}
-    targetUrl = targetUrl || 'http://localhost:3000/public/exam/38';
+    targetUrl = targetUrl || 'http://localhost:3000/public';
     await actor.attemptsTo(
         Navigate.to(targetUrl)
     );
