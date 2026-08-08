@@ -269,6 +269,12 @@ Given('candidate navigates to the saved published assessment link', async () => 
                 savedUrl = savedUrl.replace('http://localhost:3000', 'https://uat.quickexamcreator.com');
             }
             targetUrl = savedUrl;
+        } else {
+            const apiUrl = `${baseUrl}/api/exams`;
+            const response = await fetch(apiUrl).then(r => r.json()).catch(() => null);
+            if (Array.isArray(response) && response.length > 0) {
+                targetUrl = `${baseUrl}/public/exam/${response[0].id}`;
+            }
         }
     } catch (e) {}
     await actor.attemptsTo(

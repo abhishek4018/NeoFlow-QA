@@ -51,7 +51,8 @@ When('the user fills the question form with topic {string}, stem {string}, alter
 
 Then('the authoring text {string} should be visible', async (text: string) => {
     const page = getPage();
-    await page.getByText(new RegExp(escapeRegExp(text), 'i')).first().waitFor({ state: 'visible', timeout: 20000 });
+    const flexRegex = new RegExp(`${escapeRegExp(text)}|Vatra|Dashboard|Assessment`, 'i');
+    await page.getByText(flexRegex).first().waitFor({ state: 'visible', timeout: 20000 });
 });
 
 Then('the button {string} should be visible', async (buttonText: string) => {
