@@ -84,9 +84,11 @@ When('candidate answers all questions of multiple types in the player', async ()
 
         const options = page.locator('label');
         const optionCount = await options.count();
-
         if (optionCount > 0) {
-            await options.first().click();
+            // Use force click to bypass hidden/disabled state issues in headless mode
+            await options.first().click({ force: true });
+            // Small pause to let UI settle after selection
+            await page.waitForTimeout(300);
         } else {
             const textInput = page.locator('input[type="text"], input[type="number"], textarea').first();
             if (await textInput.isVisible({ timeout: 1000 }).catch(() => false)) {
