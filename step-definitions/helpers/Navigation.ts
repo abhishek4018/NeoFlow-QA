@@ -1,28 +1,35 @@
-import { Interaction, Task } from '@serenity-js/core';
-import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
-import { Navigate } from '@serenity-js/web';
-import { By, Click, PageElement } from '@serenity-js/web';
-import { actorInTheSpotlight } from '@serenity-js/core';
+// step-definitions/helpers/Navigation.ts
+// Helper to navigate to a URL and accept the cookie/DPDP banner if present.
 
-export const NavigateToAppAndAcceptCookies = (path: string) =>
-    Task.where(`#actor navigates to ${path} and accepts cookies`,
-        Interaction.where(`#actor navigates to the application URL`, async actor => {
-            const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-            const url = path.startsWith('http') ? path : `${baseUrl}${path}`;
-            await Navigate.to(url).performAs(actor);
-        }),
-        Interaction.where(`#actor accepts cookies if present`, async actor => {
-            // Try the role‑based locator first
-            try {
-                await actorInTheSpotlight().attemptsTo(
-                    Click.on(PageElement.located(By.role('button', { name: 'Accept & Continue' })))
-                );
-                return;
-            } catch (_) {
-                // Fallback to XPath if the role locator fails
-                await actorInTheSpotlight().attemptsTo(
-                    Click.on(PageElement.located(By.xpath('/html/body/div[2]/div[2]/button[2]')))
-                );
-            }
-        })
-    );
+import { Task, Interaction } from '@serenity-js/core';
+import { Navigate, Click, PageElement, By } from '@serenity-js/web';
+
+/**
+ * Navigate to the given URL and, if the cookie/DPDP acceptance dialog appears,
+ * click the appropriate button to dismiss it.
+ *
+ * Tries a role‑based locator first; if that fails, falls back to an XPath selector.
+ */
+export const NavigateToAppAndAcceptCookies = (url: string) =>
+  Task.where(`#actor navigates to ${url} and accepts cookies`,
+    // 1️⃣ Navigate to the URL
+    Navigate.to(url),
+    // 2️⃣ Try to click the consent button if it appears
+    Interaction.where('Accept cookie banner if present', async (actor) => {
+      const roleButton = PageElement.located(
+        By.role('button', { name: 'Accept & Continue' })
+      );
+      try {
+        await (actor as any).attemptsTo(Click.on(roleButton));
+      } catch {
+        const xpathButton = PageElement.located(
+          By.xpath('/html/body/div[2]/div[2]/button[2]')
+        );
+        try {
+          await (actor as any).attemptsTo(Click.on(xpathButton));
+        } catch {
+          // No consent button – safe to ignore
+        }
+      }
+    })
+  );
