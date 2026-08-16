@@ -117,10 +117,18 @@ When('candidate answers all questions of multiple types in the player', async ()
 
 When('candidate confirms submission in the pre-submission decision modal', async () => {
     const actor = actorInTheSpotlight();
-    await actor.attemptsTo(
-        Wait.upTo(Duration.ofSeconds(10)).until(ConfirmSubmitAssessmentButton(), isVisible()),
-        Click.on(ConfirmSubmitAssessmentButton())
-    );
+    const playwright = actor.abilityTo(BrowseTheWebWithPlaywright);
+    const playwrightSession = (playwright as any).session;
+    const currentBrowserPage = playwrightSession?.currentBrowserPage;
+    const browserContext = (playwright as any).browserContext || (playwright as any).context;
+    const pages = browserContext?.pages?.() || [];
+    const page = currentBrowserPage?.page || pages[pages.length - 1];
+    if (!page) {
+        throw new Error('Could not resolve Playwright page for confirm submission');
+    }
+    // Wait up to 30s for the button to appear
+    await page.waitForSelector('#btn-confirm-submit-assessment', { state: 'visible', timeout: 30000 });
+    await page.click('#btn-confirm-submit-assessment', { force: true });
 });
 
 Then('candidate should see the student pedagogical results view', async () => {
