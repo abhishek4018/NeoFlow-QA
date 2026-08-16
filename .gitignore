@@ -17,5 +17,5 @@ target
 
 # Local environment variables
 .env
-*.tmp
+
 .magic_link_token.tmp
