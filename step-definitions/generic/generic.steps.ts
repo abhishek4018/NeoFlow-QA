@@ -1,3 +1,4 @@
+import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 import { Given, When, Then } from '@cucumber/cucumber';
 import { actorInTheSpotlight } from '@serenity-js/core';
 import { Ensure, equals } from '@serenity-js/assertions';
@@ -7,7 +8,7 @@ import { By, Click, Enter, Navigate, PageElement, Text, isVisible } from '@seren
 
 Given('the user navigates to {string}', async (url: string) => {
     await actorInTheSpotlight().attemptsTo(
-        Navigate.to(url)
+        NavigateToAppAndAcceptCookies(url)
     );
 });
 

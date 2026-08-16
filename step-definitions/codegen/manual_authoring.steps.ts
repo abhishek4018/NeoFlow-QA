@@ -1,3 +1,4 @@
+import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 import { Given, When, Then } from '@cucumber/cucumber';
 import { actorInTheSpotlight } from '@serenity-js/core';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
@@ -37,7 +38,7 @@ When('the user clicks the button {string}', async (buttonText: string) => {
 When('the user fills the question form with topic {string}, stem {string}, alternatives {string}, {string}, {string}, {string}, rationale {string}', async (topic: string, stem: string, altA: string, altB: string, altC: string, altD: string, rationale: string) => {
     const page = getPage();
 
-    await page.locator('input[placeholder="Topic..."]').fill(topic);
+    await page.locator('input[placeholder="Topic..."]').first().fill(topic);
     await page.locator('textarea').first().fill(stem);
 
     const altInputs = page.locator('input[placeholder^="Alternative"]');
@@ -72,7 +73,8 @@ When('the user opens the creator dashboard from the magic link', async () => {
         throw new Error('Could not find the Launch Creator Dashboard link');
     }
 
-    const fullUrl = link.startsWith('http') ? link : `http://localhost:3000${link}`;
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const fullUrl = link.startsWith('http') ? link : `${baseUrl}${link}`;
     await page.goto(fullUrl, { waitUntil: 'networkidle', timeout: 120000 });
 });
 
@@ -80,7 +82,8 @@ Then('the user extracts and saves the magic link token', async () => {
     const page = getPage();
     const link = await page.locator('a', { hasText: /launch creator dashboard/i }).first().getAttribute('href');
     if (link) {
-        const fullUrl = link.startsWith('http') ? link : `http://localhost:3000${link}`;
+        const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const fullUrl = link.startsWith('http') ? link : `${baseUrl}${link}`;
         try {
             require('fs').writeFileSync('.magic_link_token.tmp', fullUrl);
         } catch (e) {}
@@ -89,14 +92,14 @@ Then('the user extracts and saves the magic link token', async () => {
 
 Given('the user opens the creator dashboard using the saved magic link token', async () => {
     const actor = actorInTheSpotlight();
-    let dashboardUrl = 'http://localhost:3000/public';
+    let dashboardUrl = '/public';
     try {
         if (require('fs').existsSync('.magic_link_token.tmp')) {
             dashboardUrl = require('fs').readFileSync('.magic_link_token.tmp', 'utf-8').trim();
         }
     } catch (e) {}
     await actor.attemptsTo(
-        Navigate.to(dashboardUrl)
+        NavigateToAppAndAcceptCookies(dashboardUrl)
     );
 });
 
@@ -119,7 +122,7 @@ When('the user creates an assessment from the approved question bank', async () 
 
     const createAssessmentButton = page.getByRole('button', { name: /publish assessment|create assessment/i });
     if (await createAssessmentButton.count()) {
-        await createAssessmentButton.first().click();
+        await createAssessmentButton.first().click({ force: true });
         await page.waitForTimeout(2000);
     }
 
@@ -148,7 +151,8 @@ Then('the user extracts and saves the published assessment link', async () => {
         if (href) {
             const match = href.match(/\/public\/exam\/(\d+)/);
             if (match) {
-                const examUrl = `http://localhost:3000/public/exam/${match[1]}`;
+                const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+                const examUrl = `${baseUrl}/public/exam/${match[1]}`;
                 try {
                     require('fs').writeFileSync('.shareable_exam_link.tmp', examUrl);
                 } catch (e) {}

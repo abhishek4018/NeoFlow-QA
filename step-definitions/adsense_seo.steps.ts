@@ -1,3 +1,4 @@
+import { NavigateToAppAndAcceptCookies } from './helpers/Navigation';
 import { Given, Then } from '@cucumber/cucumber';
 import { Navigate, PageElement, By, Text } from '@serenity-js/web';
 import { Ensure, includes } from '@serenity-js/assertions';
@@ -8,7 +9,7 @@ const PageBody = () => PageElement.located(By.css('body')).describedAs('Page Bod
 
 Given('{actor} navigates to {string}', async (actor, url: string) => {
   await actor.attemptsTo(
-    Navigate.to(url)
+    NavigateToAppAndAcceptCookies(url)
   );
 });
 
@@ -26,7 +27,7 @@ Then('{actor} should verify the script element contains client ID {string}', asy
 
 Given('{actor} verifies public page {string}', async (actor, url: string) => {
   await actor.attemptsTo(
-    Navigate.to(url)
+    NavigateToAppAndAcceptCookies(url)
   );
 });
 

@@ -149,6 +149,8 @@ ENVIRONMENT=uat npm run test:smoke
 npm start
 
 npm run clean && HEADLESS=false BROWSER=chrome ENVIRONMENT=dev npx cucumber-js --tags "@smoke" && npx serenity-bdd run --features ./features
+
+HEADLESS=false BASE_URL=https://uat.quickexamcreator.com npm run test:negative
 ```
 
 ### Windows Command Prompt (cmd.exe)

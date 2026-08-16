@@ -1,3 +1,4 @@
+import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 import { Given, Then } from '@cucumber/cucumber';
 import { actorInTheSpotlight } from '@serenity-js/core';
 import { Ensure, equals } from '@serenity-js/assertions';
@@ -10,7 +11,7 @@ import path from 'path';
 
 Given('the user navigates to the Happiest Health homepage', async () => {
     await actorInTheSpotlight().attemptsTo(
-        Navigate.to('')
+        NavigateToAppAndAcceptCookies('')
     );
 });
 

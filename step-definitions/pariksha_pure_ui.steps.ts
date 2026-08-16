@@ -1,3 +1,4 @@
+import { NavigateToAppAndAcceptCookies } from './helpers/Navigation';
 import { Given, When, Then } from '@cucumber/cucumber';
 import { actorCalled, actorInTheSpotlight, Duration, Wait } from '@serenity-js/core';
 import { Navigate, Click, Enter, PageElement, By, isVisible, isEnabled, Text, ExecuteScript } from '@serenity-js/web';
@@ -30,7 +31,7 @@ let shareableExamLink = '';
 
 Given('{actor} opens the Pariksha Public Landing page at {string}', async (actor, url: string) => {
     await actor.attemptsTo(
-        Navigate.to(url)
+        NavigateToAppAndAcceptCookies(url)
     );
 });
 
@@ -103,7 +104,8 @@ Then('{actor} extracts and saves the magic link token for the faculty session', 
         await link.waitFor({ state: 'visible', timeout: 15000 });
         const href = await link.getAttribute('href');
         if (href) {
-            const fullUrl = href.startsWith('http') ? href : `http://localhost:3000${href}`;
+            const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+            const fullUrl = href.startsWith('http') ? href : `${baseUrl}${href}`;
             try {
                 require('fs').writeFileSync('.magic_link_token.tmp', fullUrl);
             } catch (e) {}
@@ -112,14 +114,14 @@ Then('{actor} extracts and saves the magic link token for the faculty session', 
 });
 
 Given('{actor} opens the Faculty Creator Dashboard using the saved magic link token', async (actor) => {
-    let dashboardUrl = 'http://localhost:3000/public';
+    let dashboardUrl = '/public';
     try {
         if (require('fs').existsSync('.magic_link_token.tmp')) {
             dashboardUrl = require('fs').readFileSync('.magic_link_token.tmp', 'utf-8').trim();
         }
     } catch (e) {}
     await actor.attemptsTo(
-        Navigate.to(dashboardUrl)
+        NavigateToAppAndAcceptCookies(dashboardUrl)
     );
 });
 
@@ -223,9 +225,9 @@ Given('a candidate navigates to the saved shareable exam link', async () => {
             targetUrl = require('fs').readFileSync('.shareable_exam_link.tmp', 'utf-8').trim();
         }
     } catch (e) {}
-    targetUrl = targetUrl || 'http://localhost:3000/public';
+    targetUrl = targetUrl || '/public';
     await actor.attemptsTo(
-        Navigate.to(targetUrl)
+        NavigateToAppAndAcceptCookies(targetUrl)
     );
 });
 

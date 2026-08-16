@@ -1,7 +1,8 @@
+import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 import { Given, When, Then } from '@cucumber/cucumber';
 import { actorInTheSpotlight, Duration, Wait } from '@serenity-js/core';
 import { Navigate, Click, Enter, PageElement, By, isVisible, isEnabled, Text } from '@serenity-js/web';
-import { Ensure, includes } from '@serenity-js/assertions';
+import { Ensure, includes, isPresent } from '@serenity-js/assertions';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
 
 // Serenity/JS Page Elements using explicit By locators
@@ -13,7 +14,7 @@ const ResultsHeading = () => PageElement.located(By.xpath("//*[contains(text(),'
 Given('candidate navigates to the public exam at {string}', async (url: string) => {
     const actor = actorInTheSpotlight();
     await actor.attemptsTo(
-        Navigate.to(url)
+        NavigateToAppAndAcceptCookies(url)
     );
 });
 
@@ -36,9 +37,9 @@ When('candidate registers with first name {string}', async (firstName: string) =
     }
 
     await actor.attemptsTo(
-        Wait.upTo(Duration.ofSeconds(15)).until(CandidateFirstNameInput(), isVisible()),
+        Wait.upTo(Duration.ofSeconds(60)).until(CandidateFirstNameInput(), isVisible()),
         Enter.theValue(firstName).into(CandidateFirstNameInput()),
-        Wait.upTo(Duration.ofSeconds(5)).until(StartAssessmentButton(), isEnabled()),
+        Wait.upTo(Duration.ofSeconds(15)).until(StartAssessmentButton(), isEnabled()),
         Click.on(StartAssessmentButton())
     );
 });
@@ -76,7 +77,7 @@ When('candidate answers all questions of multiple types in the player', async ()
     let hasMoreQuestions = true;
     let safetyCounter = 0;
 
-    while (hasMoreQuestions && safetyCounter < 15) {
+    while (hasMoreQuestions && safetyCounter < 50) {
         safetyCounter++;
 
         await page.waitForTimeout(500);

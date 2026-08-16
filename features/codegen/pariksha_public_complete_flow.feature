@@ -4,7 +4,7 @@ Feature: Complete Pariksha Public Workflow Lifecycle
   I want to generate questions via AI, approve and publish them via the creator dashboard, and complete the assessment as a candidate
   So that the entire public application lifecycle is verified end-to-end
 
-  @smoke @public-complete-flow @codegen @e2e @scenario-1
+  @smoke @public-complete-flow @codegen @e2e @scenario-1 @regression
   Scenario: Faculty generates questions via AI Quick Generator and dispatches magic link
     Given the faculty opens the Pariksha Public Workspace
     When the user clicks sample material button "Cell Biology Quiz"
@@ -13,7 +13,7 @@ Feature: Complete Pariksha Public Workflow Lifecycle
     And the faculty requests a magic link for email "faculty-e2e@example.com"
     Then the faculty extracts and saves the magic link token
 
-  @smoke @public-complete-flow @codegen @e2e @scenario-2
+  @smoke @public-complete-flow @codegen @e2e @scenario-2 @regression
   Scenario: Faculty opens creator dashboard via saved magic link token, approves questions, and publishes assessment
     Given the faculty opens the creator dashboard using the saved magic link token
     Then the authoring text "Assessment Dashboard" should be visible
@@ -22,7 +22,7 @@ Feature: Complete Pariksha Public Workflow Lifecycle
     And the faculty opens the Publish Assessment modal and submits title "Algorithms Midterm Exam"
     Then the faculty extracts and saves the shareable public assessment link
 
-  @smoke @public-complete-flow @codegen @e2e @scenario-3
+  @smoke @public-complete-flow @codegen @e2e @scenario-3 @regression
   Scenario: Student candidate completes newly published assessment attempt and views pedagogical results
     Given candidate navigates to the saved published assessment link
     When candidate registers with first name "Neo Candidate"

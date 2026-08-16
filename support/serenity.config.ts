@@ -41,7 +41,7 @@ const baseUrls: Record<string, string> = {
     uat: 'https://uat.quickexamcreator.com',
     prod: 'https://quickexamcreator.com',
 };
-const baseURL = baseUrls[environment] || baseUrls['uat'];
+const baseURL = process.env.BASE_URL || baseUrls[environment] || baseUrls['uat'];
 
 let browser: playwright.Browser;
 

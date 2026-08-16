@@ -1,3 +1,4 @@
+import { NavigateToAppAndAcceptCookies } from './helpers/Navigation';
 import { Given, When, Then } from '@cucumber/cucumber';
 import { actorInTheSpotlight, Duration, Wait } from '@serenity-js/core';
 import { Navigate, Click, PageElement, By, Text, isVisible } from '@serenity-js/web';
@@ -6,7 +7,7 @@ import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
 
 Given('{actor} navigates to homepage {string}', async (actor, url: string) => {
   await actor.attemptsTo(
-    Navigate.to(url)
+    NavigateToAppAndAcceptCookies(url)
   );
 });
 
@@ -20,7 +21,7 @@ Then('{actor} should see the VATRA logo mark and tagline {string}', async (actor
 
 Given('{actor} navigates to about page {string}', async (actor, url: string) => {
   await actor.attemptsTo(
-    Navigate.to(url)
+    NavigateToAppAndAcceptCookies(url)
   );
 });
 
@@ -35,7 +36,7 @@ Then('{actor} should see stakeholder sections for Educators, Students, and Insti
 
 Given('{actor} navigates to landing page {string}', async (actor, url: string) => {
   await actor.attemptsTo(
-    Navigate.to(url)
+    NavigateToAppAndAcceptCookies(url)
   );
 });
 
@@ -105,7 +106,7 @@ Then('refreshing the page should keep the consent banner hidden', async () => {
     }
   } else {
     await actor.attemptsTo(
-      Navigate.to('/public')
+      NavigateToAppAndAcceptCookies('/public')
     );
   }
 });
@@ -143,7 +144,7 @@ Given('{actor} navigates to faculty dashboard {string}', async (actor, url: stri
   }
 
   await actor.attemptsTo(
-    Navigate.to(url)
+    NavigateToAppAndAcceptCookies(url)
   );
 });
 
@@ -161,7 +162,7 @@ Given('{actor} navigates to student results page {string}', async (actor, url: s
   const targetUrl = url.includes('?') ? url : `${url}?token=mock-demo-token`;
 
   await actor.attemptsTo(
-    Navigate.to(targetUrl)
+    NavigateToAppAndAcceptCookies(targetUrl)
   );
 
   const playwright = actor.abilityTo(BrowseTheWebWithPlaywright);

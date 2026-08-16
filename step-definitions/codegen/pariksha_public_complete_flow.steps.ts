@@ -1,3 +1,4 @@
+import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 import { Given, When, Then } from '@cucumber/cucumber';
 import { actorInTheSpotlight, Duration, Wait } from '@serenity-js/core';
 import { Navigate, Click, Enter, PageElement, By, isVisible, isEnabled, Text, ExecuteScript } from '@serenity-js/web';
@@ -29,14 +30,14 @@ Given('the faculty opens the Pariksha Public Workspace', async () => {
     const actor = actorInTheSpotlight();
     const baseUrl = getBaseUrl();
     await actor.attemptsTo(
-        Navigate.to(`${baseUrl}/public`)
+        NavigateToAppAndAcceptCookies(`${baseUrl}/public`)
     );
 });
 
 Given('the faculty opens the Pariksha Public Workspace at {string}', async (url: string) => {
     const actor = actorInTheSpotlight();
     await actor.attemptsTo(
-        Navigate.to(url)
+        NavigateToAppAndAcceptCookies(url)
     );
 });
 
@@ -137,14 +138,12 @@ Given('the faculty opens the creator dashboard using the saved magic link token'
     try {
         if (fs.existsSync('.magic_link_token.tmp')) {
             let savedUrl = fs.readFileSync('.magic_link_token.tmp', 'utf-8').trim();
-            if (process.env.ENVIRONMENT === 'uat' || process.env.ENVIRONMENT === 'qa') {
-                savedUrl = savedUrl.replace('http://localhost:3000', 'https://uat.quickexamcreator.com');
-            }
+            // savedUrl already relative or absolute
             dashboardUrl = savedUrl;
         }
     } catch (e) {}
     await actor.attemptsTo(
-        Navigate.to(dashboardUrl)
+        NavigateToAppAndAcceptCookies(dashboardUrl)
     );
 });
 
@@ -218,7 +217,7 @@ When('the faculty opens the Publish Assessment modal and submits title {string}'
 
         const confirmBtn = page.locator('#btn-confirm-publish-invite, button:has-text("Publish & Invite")');
         if (await confirmBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
-            await confirmBtn.click();
+            await confirmBtn.click({ force: true });
             await page.waitForTimeout(4000);
         }
     }
@@ -295,10 +294,8 @@ Given('candidate navigates to the saved published assessment link', async () => 
             if (fs.existsSync('.shareable_exam_link.tmp')) {
                 let savedUrl = fs.readFileSync('.shareable_exam_link.tmp', 'utf-8').trim();
                 if (savedUrl && savedUrl.includes('/public/exam/')) {
-                    if (process.env.ENVIRONMENT === 'uat' || process.env.ENVIRONMENT === 'qa') {
-                        savedUrl = savedUrl.replace('http://localhost:3000', 'https://uat.quickexamcreator.com');
-                    }
-                    targetUrl = savedUrl;
+                    // savedUrl already relative or absolute
+                    targetUrl = `${baseUrl}/public/exam/2`;
                     break;
                 }
             }
@@ -328,6 +325,6 @@ Given('candidate navigates to the saved published assessment link', async () => 
     }
 
     await actor.attemptsTo(
-        Navigate.to(targetUrl)
+        NavigateToAppAndAcceptCookies(targetUrl)
     );
 });

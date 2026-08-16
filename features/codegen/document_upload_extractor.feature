@@ -4,9 +4,9 @@ Feature: Document Upload Assessment Question Extraction and File Management
   I want to upload document notes, verify file preview badges, and manage file attachments
   So that questions are accurately extracted from source material
 
-  @doc-upload @codegen
+  @doc-upload @codegen @regression
   Scenario: Upload document notes, verify preview badge, test file removal, and extract questions
-    Given candidate opens Pariksha Public Page at "http://localhost:3000/public"
+    Given candidate opens Pariksha Public Page at "/public"
     When candidate ensures "Paste Text / File" mode is active
     And candidate uploads document named "lecture_notes_biology.txt" with content "CELL BIOLOGY NOTES: Mitochondria is the powerhouse of the cell."
     Then file preview badge for "lecture_notes_biology.txt" should be visible with a Remove button

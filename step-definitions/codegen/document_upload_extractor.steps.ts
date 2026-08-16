@@ -1,3 +1,4 @@
+import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 import { Given, When, Then } from '@cucumber/cucumber';
 import { actorInTheSpotlight } from '@serenity-js/core';
 import { Navigate } from '@serenity-js/web';
@@ -22,7 +23,7 @@ function getPage() {
 Given('candidate opens Pariksha Public Page at {string}', async (url: string) => {
     const actor = actorInTheSpotlight();
     await actor.attemptsTo(
-        Navigate.to(url)
+        NavigateToAppAndAcceptCookies(url)
     );
 });
 
