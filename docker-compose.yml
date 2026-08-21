@@ -1,0 +1,15 @@
+services:
+  neoflow-aqe:
+    build: .
+    container_name: neoflow-aqe-worker
+    restart: always
+    environment:
+      - TARGET_URL=https://quickexamcreator.com
+      - DAEMON_INTERVAL_SECONDS=3600
+    volumes:
+      - ./target:/app/target
+      - ./spkb.db:/app/spkb.db
+      - ./features/codegen:/app/features/codegen
+      - ./step-definitions/codegen:/app/step-definitions/codegen
+    ports:
+      - "8080:8080"
