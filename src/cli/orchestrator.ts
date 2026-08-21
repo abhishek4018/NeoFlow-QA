@@ -27,19 +27,23 @@ export class AutonomousOrchestrator {
     }
 
     public async runCycle(page: Page): Promise<CycleResult> {
-        // 1. Crawl & Invariant Monitor
-        await this.crawler.crawl(page, this.options.targetUrl, {
+        // 1. Determine next targets: check if unexplored frontier exists; otherwise start with root
+        const frontier = this.spkb.getUnexploredFrontier();
+        const targetUrl = frontier.length > 0 ? frontier[0].url : this.options.targetUrl;
+
+        // 2. Crawl the chosen target URL and map its downstream elements/transitions
+        await this.crawler.crawl(page, targetUrl, {
             maxDepth: this.options.maxDepth || 1,
             maxPages: this.options.maxPages || 5
         });
 
-        // 2. Query Frontier & Violations
-        const frontier = this.spkb.getUnexploredFrontier();
+        // 3. Query updated remaining frontier
+        const remainingFrontier = this.spkb.getUnexploredFrontier();
 
         return {
             pagesExplored: 1,
             invariantsViolationsCount: 0,
-            frontierRemaining: frontier.length
+            frontierRemaining: remainingFrontier.length
         };
     }
 }
