@@ -5,10 +5,15 @@ services:
     restart: always
     environment:
       - TARGET_URL=https://quickexamcreator.com
-      - DAEMON_INTERVAL_SECONDS=3600
+      - DAEMON_INTERVAL_SECONDS=600
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL=llama3.2:3b
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ./target:/app/target
       - ./spkb.db:/app/spkb.db
+      - ./codegen:/app/codegen
       - ./features/codegen:/app/features/codegen
       - ./step-definitions/codegen:/app/step-definitions/codegen
     ports:

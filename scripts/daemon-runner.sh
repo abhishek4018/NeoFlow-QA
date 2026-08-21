@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-INTERVAL_SECONDS=${DAEMON_INTERVAL_SECONDS:-3600}
+INTERVAL_SECONDS=${DAEMON_INTERVAL_SECONDS:-600}
 TARGET_URL=${TARGET_URL:-"https://quickexamcreator.com"}
 
 echo "========================================================"
