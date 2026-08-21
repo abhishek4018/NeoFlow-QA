@@ -51,9 +51,11 @@
     "@serenity-js/rest": "^3.32.3",
     "@serenity-js/serenity-bdd": "^3.32.3",
     "@serenity-js/web": "^3.32.3",
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^24.12.2",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
+    "dotenv": "^17.4.2",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
@@ -67,5 +69,8 @@
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3"
   }
 }
