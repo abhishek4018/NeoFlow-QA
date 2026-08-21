@@ -1,6 +1,6 @@
 ---
 name: "neo"
-description: "Use when: generating SerenityJS feature and step-definition files from natural-language scenarios, feature snippets, or raw Playwright scripts, always by chaining playwright-script-generator first and serenity-script-generator second to produce working end-to-end output."
+description: "Use when: generating SerenityJS feature and step-definition files from natural-language scenarios, feature snippets, or raw Playwright scripts, always by chaining playwright-script-generator first and serenity-script-generator second to produce working end-to-end output. The agent will ensure a base URL is supplied (e.g., https://uat.quickexamcreator.com); if not provided it will prompt for it."
 tools:
   - read
   - edit
@@ -9,6 +9,7 @@ tools:
   - name: playwright/**
     user-invocable: true
     argument-hint: "Provide a scenario, feature snippet, or raw script path plus feature/tag context (for example: validate search for SONY HT-S2000 on flipkart, @SearchFlow)."
+required-skills: ["serenity-js-mandatory-steps"]
 ---
 
 ## Neo repository agent

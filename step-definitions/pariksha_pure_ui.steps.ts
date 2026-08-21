@@ -1,7 +1,8 @@
 import { NavigateToAppAndAcceptCookies } from './helpers/Navigation';
 import { Given, When, Then } from '@cucumber/cucumber';
 import { actorCalled, actorInTheSpotlight, Duration, Wait } from '@serenity-js/core';
-import { Navigate, Click, Enter, PageElement, By, isVisible, isEnabled, Text, ExecuteScript } from '@serenity-js/web';
+import { Navigate, Enter, PageElement, By, isVisible, isEnabled, Text, ExecuteScript } from '@serenity-js/web';
+import { ClickWhenReady } from './helpers/Interactions';
 import { Ensure, includes } from '@serenity-js/assertions';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
 
@@ -63,7 +64,7 @@ When('{actor} enters source text into the Quick Generator textarea', async (acto
 When('{actor} clicks the Generate Question Set button', async (actor) => {
     await actor.attemptsTo(
         Wait.upTo(Duration.ofSeconds(15)).until(GenerateQuestionsButton(), isEnabled()),
-        Click.on(GenerateQuestionsButton())
+        ClickWhenReady(GenerateQuestionsButton())
     );
 });
 
@@ -87,7 +88,7 @@ When('{actor} requests a magic link for a fresh faculty email', async (actor) =>
     await actor.attemptsTo(
         Wait.upTo(Duration.ofSeconds(10)).until(SignupEmailInput(), isVisible()),
         Enter.theValue(dynamicEmail).into(SignupEmailInput()),
-        Click.on(RequestMagicLinkButton())
+        ClickWhenReady(RequestMagicLinkButton())
     );
 });
 
@@ -128,23 +129,23 @@ Given('{actor} opens the Faculty Creator Dashboard using the saved magic link to
 When('{actor} launches the Faculty Creator Dashboard', async (actor) => {
     await actor.attemptsTo(
         Wait.upTo(Duration.ofSeconds(10)).until(LaunchDashboardLink(), isVisible()),
-        Click.on(LaunchDashboardLink())
+        ClickWhenReady(LaunchDashboardLink())
     );
 });
 
 When('{actor} approves all generated questions in the Approval Queue', async (actor) => {
     await actor.attemptsTo(
         Wait.upTo(Duration.ofSeconds(10)).until(BulkApproveButton(), isVisible()),
-        Click.on(BulkApproveButton())
+        ClickWhenReady(BulkApproveButton())
     );
 });
 
 When('{actor} opens the Publish Assessment modal from the Question Bank', async (actor) => {
     await actor.attemptsTo(
         Wait.upTo(Duration.ofSeconds(10)).until(QuestionBankTab(), isVisible()),
-        Click.on(QuestionBankTab()),
+        ClickWhenReady(QuestionBankTab()),
         Wait.upTo(Duration.ofSeconds(5)).until(OpenPublishModalButton(), isEnabled()),
-        Click.on(OpenPublishModalButton())
+        ClickWhenReady(OpenPublishModalButton())
     );
 });
 
@@ -153,16 +154,16 @@ When('{actor} fills the assessment title {string} and submits "Publish & Invite"
         Wait.upTo(Duration.ofSeconds(10)).until(ExamTitleInput(), isVisible()),
         Enter.theValue(title).into(ExamTitleInput()),
         Enter.theValue('student1@uni.edu').into(StudentEmailsInput()),
-        Click.on(ConfirmPublishInviteButton())
+        ClickWhenReady(ConfirmPublishInviteButton())
     );
 });
 
 Then('{actor} should extract and save the shareable public assessment link', async (actor) => {
     await actor.attemptsTo(
         Wait.upTo(Duration.ofSeconds(15)).until(PublishedTab(), isVisible()),
-        Click.on(PublishedTab()),
+        ClickWhenReady(PublishedTab()),
         Wait.upTo(Duration.ofSeconds(15)).until(CopyExamLinkButton(), isVisible()),
-        Click.on(CopyExamLinkButton())
+        ClickWhenReady(CopyExamLinkButton())
     );
 
     const link = await actor.answer(ExecuteScript.sync(() => {
@@ -190,9 +191,9 @@ Then('{actor} should extract and save the shareable public assessment link', asy
 Then('{actor} should extract the shareable public assessment link', async (actor) => {
     await actor.attemptsTo(
         Wait.upTo(Duration.ofSeconds(15)).until(PublishedTab(), isVisible()),
-        Click.on(PublishedTab()),
+        ClickWhenReady(PublishedTab()),
         Wait.upTo(Duration.ofSeconds(15)).until(CopyExamLinkButton(), isVisible()),
-        Click.on(CopyExamLinkButton())
+        ClickWhenReady(CopyExamLinkButton())
     );
 
     const link = await actor.answer(ExecuteScript.sync(() => {
@@ -236,7 +237,7 @@ When('the candidate enters first name {string} and clicks "Start Assessment"', a
     await actor.attemptsTo(
         Wait.upTo(Duration.ofSeconds(10)).until(CandidateFirstNameInput(), isVisible()),
         Enter.theValue(firstName).into(CandidateFirstNameInput()),
-        Click.on(StartAssessmentButton())
+        ClickWhenReady(StartAssessmentButton())
     );
 });
 
@@ -313,7 +314,7 @@ When('the candidate confirms submission in the Pre-Submission Summary modal', as
     const actor = actorInTheSpotlight();
     await actor.attemptsTo(
         Wait.upTo(Duration.ofSeconds(15)).until(ConfirmSubmitAssessmentButton(), isVisible()),
-        Click.on(ConfirmSubmitAssessmentButton())
+        ClickWhenReady(ConfirmSubmitAssessmentButton())
     );
 });
 

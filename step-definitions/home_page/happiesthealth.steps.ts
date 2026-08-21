@@ -2,7 +2,8 @@ import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 import { Given, Then } from '@cucumber/cucumber';
 import { actorInTheSpotlight } from '@serenity-js/core';
 import { Ensure, equals } from '@serenity-js/assertions';
-import { By, Click, Navigate, PageElement, Text, isVisible } from '@serenity-js/web';
+import { By, Navigate, PageElement, Text, isVisible } from '@serenity-js/web';
+import { ClickWhenReady } from '../helpers/Interactions';
 import { waitForElementWithXPath } from '../../test/utils';
 import path from 'path';
 
@@ -28,6 +29,6 @@ Then('the logo should be visible', async () => {
 });
 
 Then('user clicks on the {string} button', async (buttonName: string) => {
-    await actorInTheSpotlight().attemptsTo(waitForElementWithXPath('//button[text()="' + buttonName + '"]', 15),Click.on(PageElement.located(By.xpath('//button[text()="' + buttonName + '"]')))
+    await actorInTheSpotlight().attemptsTo(waitForElementWithXPath('//button[text()="' + buttonName + '"]', 15), ClickWhenReady(PageElement.located(By.xpath('//button[text()="' + buttonName + '"]')))
     );
 });

@@ -3,6 +3,7 @@ import { Given, When, Then } from '@cucumber/cucumber';
 import { actorInTheSpotlight, Duration, Wait } from '@serenity-js/core';
 import { Navigate, Click, Enter, PageElement, By, isVisible, isEnabled, Text, ExecuteScript } from '@serenity-js/web';
 import { Ensure, includes } from '@serenity-js/assertions';
+import { ClickWhenReady } from '../helpers/Interactions';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
 import fs from 'fs';
 
@@ -103,7 +104,7 @@ When('the faculty requests a magic link for email {string}', async (email: strin
     await actor.attemptsTo(
         Wait.upTo(Duration.ofSeconds(10)).until(SignupEmailInput(), isVisible()),
         Enter.theValue(email).into(SignupEmailInput()),
-        Click.on(RequestMagicLinkButton())
+        ClickWhenReady(RequestMagicLinkButton())
     );
 });
 

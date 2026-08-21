@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "clean": "rimraf target/*",
+    "clean": "rimraf target && mkdirp target",
     "test": "failsafe clean test:execute test:report",
     "test:execute": "cucumber-js",
     "test:smoke": "npm run clean && cucumber-js --tags \"@smoke\" || true && npm run test:report",

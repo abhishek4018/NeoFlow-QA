@@ -4,6 +4,7 @@ import { actorInTheSpotlight, Duration, Wait } from '@serenity-js/core';
 import { Navigate, Click, Enter, PageElement, By, isVisible, isEnabled, Text } from '@serenity-js/web';
 import { Ensure, includes, isPresent } from '@serenity-js/assertions';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
+import { ClickWhenReady } from '../helpers/Interactions';
 
 // Serenity/JS Page Elements using explicit By locators
 const CandidateFirstNameInput = () => PageElement.located(By.id('firstName')).describedAs('Candidate First Name input');
@@ -40,7 +41,7 @@ When('candidate registers with first name {string}', async (firstName: string) =
         Wait.upTo(Duration.ofSeconds(60)).until(CandidateFirstNameInput(), isVisible()),
         Enter.theValue(firstName).into(CandidateFirstNameInput()),
         Wait.upTo(Duration.ofSeconds(15)).until(StartAssessmentButton(), isEnabled()),
-        Click.on(StartAssessmentButton())
+        ClickWhenReady(StartAssessmentButton())
     );
 });
 
@@ -117,18 +118,9 @@ When('candidate answers all questions of multiple types in the player', async ()
 
 When('candidate confirms submission in the pre-submission decision modal', async () => {
     const actor = actorInTheSpotlight();
-    const playwright = actor.abilityTo(BrowseTheWebWithPlaywright);
-    const playwrightSession = (playwright as any).session;
-    const currentBrowserPage = playwrightSession?.currentBrowserPage;
-    const browserContext = (playwright as any).browserContext || (playwright as any).context;
-    const pages = browserContext?.pages?.() || [];
-    const page = currentBrowserPage?.page || pages[pages.length - 1];
-    if (!page) {
-        throw new Error('Could not resolve Playwright page for confirm submission');
-    }
-    // Wait up to 30s for the button to appear
-    await page.waitForSelector('#btn-confirm-submit-assessment', { state: 'visible', timeout: 30000 });
-    await page.click('#btn-confirm-submit-assessment', { force: true });
+        await actor.attemptsTo(
+            ClickWhenReady(ConfirmSubmitAssessmentButton())
+        );
 });
 
 Then('candidate should see the student pedagogical results view', async () => {
