@@ -62,6 +62,7 @@ export class AutonomousOrchestrator {
         const maxHealingAttempts = this.options.maxAutoHealingAttempts || 3;
         let attempt = 0;
         let passed = false;
+        let lastError = '';
 
         while (attempt < maxHealingAttempts && !passed) {
             attempt++;
@@ -73,12 +74,13 @@ export class AutonomousOrchestrator {
                 const rawPath = path.resolve(process.cwd(), `codegen/${flowName}_raw.spec.ts`);
                 fs.writeFileSync(rawPath, rawSpec, 'utf-8');
 
-                // Stage 2: Generate Serenity/JS BDD Assets
-                const bdd = await this.synthesizer.generateBDDAssets(flowName, rawSpec);
+                // Stage 2: Generate Serenity/JS BDD Assets (Feeding previous error if retrying)
+                const bdd = await this.synthesizer.generateBDDAssets(flowName, rawSpec, lastError);
                 
                 // Stage 2.5: AST Assertion Linting Gate
                 const lintResult = this.astLinter.lint(bdd.steps);
                 if (!lintResult.valid) {
+                    lastError = `AST Linter rejection: ${lintResult.errors.join(', ')}`;
                     console.warn(`⚠️ AST Linter rejected step definitions:`, lintResult.errors);
                     continue; // Auto-retry next generation loop
                 }
@@ -97,8 +99,9 @@ export class AutonomousOrchestrator {
                 passed = true;
                 generatedScriptPath = rawPath;
             } catch (error: any) {
-                const errorMessage = error?.stdout?.toString() || error?.message || 'Execution error';
-                console.warn(`⚠️ [Agent Mode Self-Healing] Verification failed for attempt ${attempt}:`, errorMessage.slice(0, 300));
+                const errorMessage = error?.stdout?.toString() || error?.stderr?.toString() || error?.message || 'Execution error';
+                lastError = errorMessage.slice(0, 500);
+                console.warn(`⚠️ [Agent Mode Self-Healing] Verification failed for attempt ${attempt}:`, lastError);
 
                 if (attempt >= maxHealingAttempts) {
                     console.warn(`❌ [Agent Mode] Discarding unverified draft for ${flowName} to prevent breaking suite.`);

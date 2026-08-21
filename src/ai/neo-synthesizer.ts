@@ -33,7 +33,13 @@ Rules:
         return match ? match[1].trim() : output.trim();
     }
 
-    public async generateBDDAssets(flowName: string, rawScript: string): Promise<{ feature: string; steps: string }> {
+    public async generateBDDAssets(flowName: string, rawScript: string, previousError?: string): Promise<{ feature: string; steps: string }> {
+        const errorSection = previousError ? `
+IMPORTANT: Your previous generation failed with this error:
+${previousError}
+Fix the error above by ensuring all required imports are present and syntax is 100% valid TypeScript.
+` : '';
+
         const featurePrompt = `
 You are the "serenity-script-generator" agent.
 Convert this raw Playwright test into a clean, valid Gherkin feature file for Cucumber.js.
@@ -58,12 +64,12 @@ Feature: ${flowName} Flow
 
         const stepsPrompt = `
 You are the "serenity-script-generator" agent writing TypeScript step definitions for Cucumber.js + Serenity/JS 3.
-
+${errorSection}
 EXACT IMPORTS TO USE:
 import { Given, When, Then } from '@cucumber/cucumber';
 import { actorInTheSpotlight } from '@serenity-js/core';
-import { Ensure, equals, isVisible } from '@serenity-js/assertions';
-import { By, Click, Navigate, Page, PageElement } from '@serenity-js/web';
+import { Ensure, equals } from '@serenity-js/assertions';
+import { By, Click, isVisible, Navigate, Page, PageElement } from '@serenity-js/web';
 
 EXACT FORMAT FOR STEP DEFINITIONS:
 Given('the user navigates to the target url', async () => {
