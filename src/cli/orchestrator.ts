@@ -74,8 +74,12 @@ export class AutonomousOrchestrator {
                 const rawPath = path.resolve(process.cwd(), `codegen/${flowName}_raw.spec.ts`);
                 fs.writeFileSync(rawPath, rawSpec, 'utf-8');
 
-                // Stage 2: Generate Serenity/JS BDD Assets (Feeding previous error if retrying)
-                const bdd = await this.synthesizer.generateBDDAssets(flowName, rawSpec, lastError);
+                // Stage 2: Generate Serenity/JS BDD Assets (Deterministic Screenplay AST)
+                const actionSelector = actions.length > 0 ? actions[0].selector : undefined;
+                const bdd = await this.synthesizer.generateBDDAssets(flowName, rawSpec, targetUrl, {
+                    header: '//h1 | //h2',
+                    action: actionSelector
+                });
                 
                 // Stage 2.5: AST Assertion Linting Gate
                 const lintResult = this.astLinter.lint(bdd.steps);

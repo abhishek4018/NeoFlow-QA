@@ -1,5 +1,6 @@
 import { OllamaClient } from '../ai/ollama-client';
 import { InteractiveElementAction } from '../explorer/types';
+import { ScreenplayASTAssembler } from './screenplay-assembler';
 
 export class NeoScriptSynthesizer {
     private llm: OllamaClient;
@@ -39,13 +40,7 @@ Rules:
         return raw;
     }
 
-    public async generateBDDAssets(flowName: string, rawScript: string, previousError?: string): Promise<{ feature: string; steps: string }> {
-        const errorSection = previousError ? `
-IMPORTANT: Your previous generation failed with this error:
-${previousError}
-Fix the error above by ensuring all required imports are present and syntax is 100% valid TypeScript.
-` : '';
-
+    public async generateBDDAssets(flowName: string, rawScript: string, targetUrl?: string, selectors?: { header?: string; action?: string }): Promise<{ feature: string; steps: string }> {
         const featurePrompt = `
 You are the "serenity-script-generator" agent.
 Convert this raw Playwright test into a clean, valid Gherkin feature file for Cucumber.js.
@@ -60,58 +55,17 @@ Feature: ${flowName} Flow
 
   Scenario: Validate ${flowName} Page
     Given the user navigates to the target url
-    Then the header should be visible
-    When the user clicks the action link
+    Then the main heading should be visible
+    When the user clicks the primary navigation link
 3. Return ONLY valid Gherkin text. No markdown explanation.
 `;
         const featureOutput = await this.llm.generate(featurePrompt);
         const featureMatch = featureOutput.match(/```(?:gherkin|feature)?([\s\S]*?)```/);
         const feature = (featureMatch ? featureMatch[1] : featureOutput).trim();
 
-        const stepsPrompt = `
-You are the "serenity-script-generator" agent writing TypeScript step definitions for Cucumber.js + Serenity/JS 3.
-${errorSection}
-EXACT IMPORTS TO USE:
-import { Given, When, Then } from '@cucumber/cucumber';
-import { actorInTheSpotlight } from '@serenity-js/core';
-import { Ensure, equals } from '@serenity-js/assertions';
-import { By, Click, isVisible, Navigate, Page, PageElement } from '@serenity-js/web';
-
-EXACT FORMAT FOR STEP DEFINITIONS:
-Given('the user navigates to the target url', async () => {
-    await actorInTheSpotlight().attemptsTo(
-        Navigate.to('https://quickexamcreator.com/${flowName}')
-    );
-});
-
-Then('the header should be visible', async () => {
-    await actorInTheSpotlight().attemptsTo(
-        Ensure.eventually(PageElement.located(By.xpath('//h1 | //h2')), isVisible())
-    );
-});
-
-When('the user clicks the action link', async () => {
-    await actorInTheSpotlight().attemptsTo(
-        Click.on(PageElement.located(By.xpath('//a | //button')))
-    );
-});
-
-Based on this Feature:
-${feature}
-
-Generate the exact matching TypeScript step definitions following the EXACT syntax and imports shown above.
-Return ONLY TypeScript code enclosed in \`\`\`typescript ... \`\`\`.
-`;
-        const stepsOutput = await this.llm.generate(stepsPrompt);
-        const stepsMatch = stepsOutput.match(/```(?:typescript|ts)?([\s\S]*?)```/);
-        let steps = (stepsMatch ? stepsMatch[1] : stepsOutput).trim();
-
-        // Guaranteed Import Safety Header (protects against small LLMs omitting import lines)
-        const requiredHeader = `import { Given, When, Then } from '@cucumber/cucumber';\nimport { actorInTheSpotlight } from '@serenity-js/core';\nimport { Ensure, equals } from '@serenity-js/assertions';\nimport { By, Click, isVisible, Navigate, Page, PageElement } from '@serenity-js/web';\n\n`;
-
-        if (!steps.includes('@cucumber/cucumber')) {
-            steps = requiredHeader + steps;
-        }
+        // Deterministic Screenplay AST Assembly (eliminates small LLM TypeScript hallucinations)
+        const assembler = new ScreenplayASTAssembler();
+        const steps = assembler.assembleStepDefinitions(feature, targetUrl || `https://quickexamcreator.com/${flowName}`, selectors);
 
         return { feature, steps };
     }
