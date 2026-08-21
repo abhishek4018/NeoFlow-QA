@@ -96,9 +96,14 @@ ${feature}
 Generate the exact matching TypeScript step definitions following the EXACT syntax and imports shown above.
 Return ONLY TypeScript code enclosed in \`\`\`typescript ... \`\`\`.
 `;
-        const stepsOutput = await this.llm.generate(stepsPrompt);
-        const stepsMatch = stepsOutput.match(/```(?:typescript|ts)?([\s\S]*?)```/);
-        const steps = (stepsMatch ? stepsMatch[1] : stepsOutput).trim();
+        let steps = (stepsMatch ? stepsMatch[1] : stepsOutput).trim();
+
+        // Guaranteed Import Safety Header (protects against small LLMs omitting import lines)
+        const requiredHeader = `import { Given, When, Then } from '@cucumber/cucumber';\nimport { actorInTheSpotlight } from '@serenity-js/core';\nimport { Ensure, equals } from '@serenity-js/assertions';\nimport { By, Click, isVisible, Navigate, Page, PageElement } from '@serenity-js/web';\n\n`;
+
+        if (!steps.includes('@cucumber/cucumber')) {
+            steps = requiredHeader + steps;
+        }
 
         return { feature, steps };
     }
