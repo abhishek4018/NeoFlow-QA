@@ -21,10 +21,10 @@ export class SPKBDb {
             ON CONFLICT(url) DO UPDATE SET
                 title=excluded.title,
                 status=excluded.status
+            RETURNING id
         `);
-        const info = stmt.run(node.url, node.title, node.routePath, node.discoveredAt, node.status);
-        const id = Number(info.lastInsertRowid);
-        return { ...node, id: id || node.id };
+        const row = stmt.get(node.url, node.title, node.routePath, node.discoveredAt, node.status) as { id: number };
+        return { ...node, id: row?.id || node.id };
     }
 
     public insertTransitionEdge(edge: TransitionEdge): TransitionEdge {
