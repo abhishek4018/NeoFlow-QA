@@ -30,7 +30,13 @@ Rules:
 `;
         const output = await this.llm.generate(prompt);
         const match = output.match(/```(?:typescript|ts)?([\s\S]*?)```/);
-        return match ? match[1].trim() : output.trim();
+        let raw = (match ? match[1] : output).trim();
+
+        if (!raw.includes('@playwright/test')) {
+            raw = `import { test, expect } from '@playwright/test';\n\n` + raw;
+        }
+
+        return raw;
     }
 
     public async generateBDDAssets(flowName: string, rawScript: string, previousError?: string): Promise<{ feature: string; steps: string }> {
@@ -96,6 +102,8 @@ ${feature}
 Generate the exact matching TypeScript step definitions following the EXACT syntax and imports shown above.
 Return ONLY TypeScript code enclosed in \`\`\`typescript ... \`\`\`.
 `;
+        const stepsOutput = await this.llm.generate(stepsPrompt);
+        const stepsMatch = stepsOutput.match(/```(?:typescript|ts)?([\s\S]*?)```/);
         let steps = (stepsMatch ? stepsMatch[1] : stepsOutput).trim();
 
         // Guaranteed Import Safety Header (protects against small LLMs omitting import lines)
