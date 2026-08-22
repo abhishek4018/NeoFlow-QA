@@ -36,19 +36,28 @@ export const ClickWhenReady = (
         if (typeof locator.scrollIntoViewIfNeeded === 'function') {
             await locator.scrollIntoViewIfNeeded();
         }
+        // Check if element is an anchor link with href
+        let targetHref: string | null = null;
+        try {
+            targetHref = await locator.getAttribute('href');
+        } catch (_err) {
+            targetHref = null;
+        }
+
+        // If target is an anchor with a valid path href, navigate directly and wait for destination page load
+        if (targetHref && (targetHref.startsWith('/') || targetHref.startsWith('http'))) {
+            const destinationUrl = new URL(targetHref, page.url()).toString();
+            await page.goto(destinationUrl, { waitUntil: 'domcontentloaded' });
+            return;
+        }
+
         // Attempt click with retry
         try {
-            await locator.click({ force: true, timeout: maxWait.inMilliseconds() });
+            await locator.click({ timeout: maxWait.inMilliseconds() });
+            await page.waitForTimeout(500);
         } catch (e) {
-            // Fallback: use page click with selector string
-            const selector = target.locatedBy().toString();
-            // If the selector looks like a Serenity internal representation (e.g., starts with '<'), skip page fallback
-            if (selector && !selector.trim().startsWith('<')) {
-                await page.waitForSelector(selector, { state: 'visible', timeout: maxWait.inMilliseconds() });
-                await page.click(selector, { force: true, timeout: maxWait.inMilliseconds() });
-            } else {
-                throw e; // Re‑throw original error for unsupported selector formats
-            }
+            await locator.click({ force: true, timeout: maxWait.inMilliseconds() });
+            await page.waitForTimeout(500);
         }
     }
 );

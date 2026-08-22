@@ -1,10 +1,9 @@
-@home @quickexamcreator @vatra
-Feature: home Flow
+Feature: home_read_the_solo_founder_story_ro Flow
 
-  Scenario Outline: Validate home User Journey
+  Scenario Template: Validate home_read_the_solo_founder_story_ro User Journey
     Given the user navigates to the home url
-    When the user clicks the primary navigation link for ASSESS
-    Then the main heading for ASSESS should be visible
+    When the user clicks the primary navigation link for :string
+    Then the main heading with text ":string" should be visible
     And the following key elements should be visible on the page:
       | Element Type | Identifier / Text              | Target Role |
       | Heading      | Intelligence Infrastructurefor Education | h1         |
@@ -17,4 +16,4 @@ Feature: home Flow
       | Heading      | Automated Scoring Engine       | h3         |
 
     Examples:
-      - ASSESS
+      - actions: [ { label: 'Read the Solo Founder Story & Roadmap' }, { label: 'ASSESS' } ]

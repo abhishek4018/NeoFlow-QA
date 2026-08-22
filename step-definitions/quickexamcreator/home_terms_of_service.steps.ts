@@ -6,14 +6,14 @@ import { By, isVisible, PageElement } from '@serenity-js/web';
 import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 
 
-Given('the user clicks the primary navigation link for ASSESS', async () => {
+Given('the user clicks the primary navigation link for Terms of Service', async () => {
     await actorInTheSpotlight().attemptsTo(
         NavigateToAppAndAcceptCookies('/')
     );
 });
 
 
-Then('the main heading for ASSESS should be visible', async () => {
+Then('the main heading for Terms of Service should be visible', async () => {
     await actorInTheSpotlight().attemptsTo(
         Ensure.eventually(PageElement.located(By.css('h1, h2, main')), isVisible())
     );

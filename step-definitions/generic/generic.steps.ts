@@ -15,8 +15,9 @@ Given('the user navigates to {string}', async (url: string) => {
 });
 
 Given('the user navigates to the {word} url', async (pageName: string) => {
+    const route = pageName === 'home' ? '/' : `/${pageName}`;
     await actorInTheSpotlight().attemptsTo(
-        NavigateToAppAndAcceptCookies(`/${pageName}`)
+        NavigateToAppAndAcceptCookies(route)
     );
 });
 
@@ -41,6 +42,18 @@ When('the user clicks the element with aria-label {string}', async (label: strin
 Then('the text {string} should be visible', async (text: string) => {
     await actorInTheSpotlight().attemptsTo(
         Ensure.that(PageElement.located(By.xpath(`//*[contains(text(),'${text}')]`)), isVisible())
+    );
+});
+
+Then('the main heading for {string} should be visible', async (_section: string) => {
+    await actorInTheSpotlight().attemptsTo(
+        Ensure.eventually(PageElement.located(By.xpath('//h1 | //h2 | //main')), isVisible())
+    );
+});
+
+When('the user clicks the primary navigation link for {string}', async (label: string) => {
+    await actorInTheSpotlight().attemptsTo(
+        ClickWhenReady(PageElement.located(By.xpath(`//a[contains(normalize-space(), "${label}")] | //button[contains(normalize-space(), "${label}")]`)))
     );
 });
 

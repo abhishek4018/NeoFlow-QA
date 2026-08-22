@@ -1,10 +1,9 @@
-@home @quickexamcreator @vatra
-Feature: home Flow
+Feature: Home Switch to Dark Mode Flow
 
-  Scenario Outline: Validate home User Journey
+  Scenario Outline: Validate Home Switch to Dark Mode User Journey
     Given the user navigates to the home url
-    When the user clicks the primary navigation link for ASSESS
-    Then the main heading for ASSESS should be visible
+    When the user clicks the primary navigation link for "Switch to dark mode"
+    Then the main heading for "Switch to dark mode" should be visible
     And the following key elements should be visible on the page:
       | Element Type | Identifier / Text              | Target Role |
       | Heading      | Intelligence Infrastructurefor Education | h1         |
@@ -16,5 +15,5 @@ Feature: home Flow
       | Heading      | Bloom's Taxonomy Blueprinting  | h3         |
       | Heading      | Automated Scoring Engine       | h3         |
 
-    Examples:
-      - ASSESS
+  Examples:
+    - "Switch to dark mode"

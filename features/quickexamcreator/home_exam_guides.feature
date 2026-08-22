@@ -1,10 +1,9 @@
-@home @quickexamcreator @vatra
-Feature: home Flow
+Feature: home_exam_guides Flow
 
-  Scenario Outline: Validate home User Journey
+  Scenario Outline: Validate home_exam_guides User Journey
     Given the user navigates to the home url
-    When the user clicks the primary navigation link for ASSESS
-    Then the main heading for ASSESS should be visible
+    When the user clicks the primary navigation link for <Element Type>
+    Then the main heading for <Element Type> should be visible
     And the following key elements should be visible on the page:
       | Element Type | Identifier / Text              | Target Role |
       | Heading      | Intelligence Infrastructurefor Education | h1         |
@@ -17,4 +16,5 @@ Feature: home Flow
       | Heading      | Automated Scoring Engine       | h3         |
 
     Examples:
-      - ASSESS
+      - Element Type = Exam Guides
+      - Element Type = ASSESS

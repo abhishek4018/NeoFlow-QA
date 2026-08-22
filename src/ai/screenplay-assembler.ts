@@ -50,6 +50,10 @@ Given('${escapedExpr}', async () => {
             // Skip DataTable step since it is implemented generically in generic.steps.ts
             else if (/the following key elements should be visible/i.test(expression)) {
                 continue;
+            }
+            // Skip generic heading and navigation clicks handled in generic.steps.ts
+            else if (/^the main heading for ".*" should be visible$/i.test(expression) || /^the user clicks the primary navigation link for ".*"$/i.test(expression)) {
+                continue;
             } 
             // 2. Action Steps: Map distinct action selectors for each interaction
             else if (upperKeyword === 'When' || /click|button|link|action|press|enter|type/i.test(expression)) {

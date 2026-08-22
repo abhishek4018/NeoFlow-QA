@@ -1,10 +1,10 @@
-@home @quickexamcreator @vatra
-Feature: home Flow
+@home_terms_of_service @quickexamcreator @vatra
+Feature: home_terms_of_service Flow
 
-  Scenario Outline: Validate home User Journey
+  Scenario Outline: Validate home_terms_of_service User Journey
     Given the user navigates to the home url
-    When the user clicks the primary navigation link for ASSESS
-    Then the main heading for ASSESS should be visible
+    When the user clicks the primary navigation link for Terms of Service
+    Then the main heading for Terms of Service should be visible
     And the following key elements should be visible on the page:
       | Element Type | Identifier / Text              | Target Role |
       | Heading      | Intelligence Infrastructurefor Education | h1         |
@@ -17,4 +17,4 @@ Feature: home Flow
       | Heading      | Automated Scoring Engine       | h3         |
 
     Examples:
-      - ASSESS
+      - "Terms of Service"
