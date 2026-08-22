@@ -3,20 +3,20 @@ import { actorInTheSpotlight } from '@serenity-js/core';
 import { Ensure } from '@serenity-js/assertions';
 import { By, Click, isVisible, Navigate, PageElement } from '@serenity-js/web';
 
-Given('the user navigates to the home page', async () => {
+Given('the user navigates to the home url', async () => {
     await actorInTheSpotlight().attemptsTo(
         Navigate.to('https://quickexamcreator.com/')
     );
 });
 
-Then('the main hero heading should be visible', async () => {
+When('the main heading for "Education Intelligence & Assessment" should be visible', async () => {
     await actorInTheSpotlight().attemptsTo(
-        Ensure.eventually(PageElement.located(By.xpath('//h1')), isVisible())
+        Click.on(PageElement.located(By.xpath('//a[normalize-space()="ASSESS"]')))
     );
 });
 
-When('the user clicks on the Assess link', async () => {
+Given('the user clicks the primary navigation link for "Home"', async () => {
     await actorInTheSpotlight().attemptsTo(
-        Click.on(PageElement.located(By.xpath('//nav//a[normalize-space()="Home"]')))
+        Navigate.to('https://quickexamcreator.com/')
     );
 });

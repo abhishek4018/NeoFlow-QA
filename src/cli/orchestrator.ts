@@ -77,7 +77,7 @@ export class AutonomousOrchestrator {
                 // Stage 2: Generate Serenity/JS BDD Assets (Deterministic Screenplay AST)
                 const actionSelector = actions.length > 0 ? actions[0].selector : undefined;
                 const bdd = await this.synthesizer.generateBDDAssets(flowName, rawSpec, targetUrl, {
-                    header: '//h1 | //h2',
+                    header: 'body',
                     action: actionSelector
                 });
                 

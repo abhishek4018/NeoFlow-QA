@@ -5,8 +5,8 @@ export interface ExtractedSelectors {
 
 export class ScreenplayASTAssembler {
     public assembleStepDefinitions(featureContent: string, targetUrl: string, selectors: ExtractedSelectors = {}): string {
-        const headerSelector = selectors.header || '//h1 | //h2';
-        const actionSelector = selectors.action || '//nav//a[1] | //button[1]';
+        const headerSelector = selectors.header || '//h1 | //h2 | //h3 | //header | //main';
+        const actionSelector = selectors.action || '//nav//a[1] | //button[1] | //a[1]';
 
         // Extract Gherkin Step expressions from feature text
         const stepLines = featureContent
@@ -27,32 +27,33 @@ export class ScreenplayASTAssembler {
             if (registeredExpressions.has(expression)) continue;
             registeredExpressions.add(expression);
 
-            if (/navigat/i.test(expression) || /url/i.test(expression) || /home/i.test(expression)) {
+            const headerBy = headerSelector.startsWith('//') || headerSelector.startsWith('(')
+                ? `By.xpath('${headerSelector}')`
+                : `By.css('${headerSelector}')`;
+            const actionBy = actionSelector.startsWith('//') || actionSelector.startsWith('(')
+                ? `By.xpath('${actionSelector}')`
+                : `By.css('${actionSelector}')`;
+            const upperKeyword = keyword.charAt(0).toUpperCase() + keyword.slice(1).toLowerCase();
+
+            if (upperKeyword === 'Given' || /navigat/i.test(expression) || /visit/i.test(expression)) {
                 generatedStepHandlers.push(`
 Given('${expression}', async () => {
     await actorInTheSpotlight().attemptsTo(
         Navigate.to('${targetUrl}')
     );
 });`);
-            } else if (/header|heading|title|text|see|visible/i.test(expression)) {
-                generatedStepHandlers.push(`
-Then('${expression}', async () => {
-    await actorInTheSpotlight().attemptsTo(
-        Ensure.eventually(PageElement.located(By.xpath('${headerSelector}')), isVisible())
-    );
-});`);
-            } else if (/click|button|link|action|press/i.test(expression)) {
+            } else if (upperKeyword === 'When' || /click|button|link|action|press/i.test(expression)) {
                 generatedStepHandlers.push(`
 When('${expression}', async () => {
     await actorInTheSpotlight().attemptsTo(
-        Click.on(PageElement.located(By.xpath('${actionSelector}')))
+        Click.on(PageElement.located(${actionBy}))
     );
 });`);
             } else {
                 generatedStepHandlers.push(`
 Then('${expression}', async () => {
     await actorInTheSpotlight().attemptsTo(
-        Ensure.eventually(PageElement.located(By.xpath('//main | //nav | //body')), isVisible())
+        Ensure.eventually(PageElement.located(${headerBy}), isVisible())
     );
 });`);
             }
