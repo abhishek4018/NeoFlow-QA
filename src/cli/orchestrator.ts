@@ -99,10 +99,13 @@ export class AutonomousOrchestrator {
 
                 // Stage 2: Generate Serenity/JS BDD Assets (Deterministic Screenplay AST)
                 const actionSelector = selectedActions.length > 0 ? selectedActions[0].selector : undefined;
+                const actionLabel = selectedActions.length > 0 ? (selectedActions[0].label || flowName) : flowName;
                 const bdd = await this.synthesizer.generateBDDAssets(flowName, rawSpec, targetUrl, {
                     header: 'h1, h2, h3, header, main, nav, a, button',
                     action: actionSelector,
-                    actions: selectedActions
+                    actions: selectedActions,
+                    baseRouteName: baseFlowName,
+                    actionLabel
                 });
                 
                 // Stage 2.5: AST Assertion Linting Gate

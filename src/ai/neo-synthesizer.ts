@@ -60,9 +60,11 @@ ${actionSnippet}
         flowName: string,
         rawScript: string,
         targetUrl?: string,
-        selectors?: { header?: string; action?: string; actions?: InteractiveElementAction[] }
+        selectors?: { header?: string; action?: string; actions?: InteractiveElementAction[]; baseRouteName?: string; actionLabel?: string }
     ): Promise<{ feature: string; steps: string }> {
         let feature = '';
+        const baseRoute = selectors?.baseRouteName || 'home';
+        const actionLabel = selectors?.actionLabel || flowName;
 
         try {
             const featurePrompt = `
@@ -77,11 +79,11 @@ Rules:
 @${flowName} @quickexamcreator @vatra
 Feature: ${flowName} Flow
 
-  Scenario: Validate ${flowName} Page
-    Given the user navigates to the ${flowName} url
-    Then the main heading for ${flowName} should be visible
-    When the user clicks the primary navigation link for ${flowName}
-3. Never output hardcoded URLs in Given steps. Always use: "Given the user navigates to the ${flowName} url"
+  Scenario: Validate ${flowName} User Journey
+    Given the user navigates to the ${baseRoute} url
+    When the user clicks the primary navigation link for ${actionLabel}
+    Then the main heading for ${actionLabel} should be visible
+3. Always navigate to the starting page using: "Given the user navigates to the ${baseRoute} url"
 4. Return ONLY valid Gherkin text. No markdown explanation.
 `;
             const featureOutput = await this.llm.generate(featurePrompt);
@@ -91,16 +93,16 @@ Feature: ${flowName} Flow
             feature = `@${flowName} @quickexamcreator @vatra
 Feature: ${flowName} Flow
 
-  Scenario: Validate ${flowName} Page
-    Given the user navigates to the ${flowName} url
-    Then the main heading for ${flowName} should be visible
-    When the user clicks the primary navigation link for ${flowName}
+  Scenario: Validate ${flowName} User Journey
+    Given the user navigates to the ${baseRoute} url
+    When the user clicks the primary navigation link for ${actionLabel}
+    Then the main heading for ${actionLabel} should be visible
 `;
         }
 
         // Deterministic Screenplay AST Assembly (eliminates small LLM TypeScript hallucinations)
         const assembler = new ScreenplayASTAssembler();
-        const steps = assembler.assembleStepDefinitions(feature, targetUrl || `https://quickexamcreator.com/${flowName}`, selectors);
+        const steps = assembler.assembleStepDefinitions(feature, targetUrl || `https://quickexamcreator.com/${baseRoute}`, selectors);
 
         return { feature, steps };
     }
