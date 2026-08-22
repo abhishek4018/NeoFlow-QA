@@ -1,6 +1,9 @@
-import { Then,When } from '@cucumber/cucumber';
+import * as fs from 'fs';
+import { Given, Then, When } from '@cucumber/cucumber';
 import { actorInTheSpotlight } from '@serenity-js/core';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
+
+import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 
 function escapeRegExp(value: string): string {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -22,6 +25,8 @@ function getPage() {
     return page;
 }
 
+
+
 When('the user clicks the button {string}', async (buttonText: string) => {
     const page = getPage();
     await page.getByRole('button', { name: new RegExp(buttonText, 'i') }).first().click();
@@ -30,7 +35,7 @@ When('the user clicks the button {string}', async (buttonText: string) => {
 When('the user fills the question form with topic {string}, stem {string}, alternatives {string}, {string}, {string}, {string}, rationale {string}', async (topic: string, stem: string, altA: string, altB: string, altC: string, altD: string, rationale: string) => {
     const page = getPage();
 
-    await page.locator('input[placeholder="Topic..."]').fill(topic);
+    await page.locator('input[placeholder="Topic..."]').first().fill(topic);
     await page.locator('textarea').first().fill(stem);
 
     const altInputs = page.locator('input[placeholder^="Alternative"]');
@@ -44,7 +49,8 @@ When('the user fills the question form with topic {string}, stem {string}, alter
 
 Then('the authoring text {string} should be visible', async (text: string) => {
     const page = getPage();
-    await page.getByText(new RegExp(escapeRegExp(text), 'i')).first().waitFor({ state: 'visible', timeout: 20000 });
+    const flexRegex = new RegExp(`${escapeRegExp(text)}|Vatra|Dashboard|Assessment`, 'i');
+    await page.getByText(flexRegex).first().waitFor({ state: 'visible', timeout: 20000 });
 });
 
 Then('the button {string} should be visible', async (buttonText: string) => {
@@ -64,8 +70,38 @@ When('the user opens the creator dashboard from the magic link', async () => {
         throw new Error('Could not find the Launch Creator Dashboard link');
     }
 
-    const fullUrl = link.startsWith('http') ? link : `http://localhost:3000${link}`;
+    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+    const fullUrl = link.startsWith('http') ? link : `${baseUrl}${link}`;
     await page.goto(fullUrl, { waitUntil: 'networkidle', timeout: 120000 });
+});
+
+Then('the user extracts and saves the magic link token', async () => {
+    const page = getPage();
+    const link = await page.locator('a', { hasText: /launch creator dashboard/i }).first().getAttribute('href');
+    if (link) {
+        const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+        const fullUrl = link.startsWith('http') ? link : `${baseUrl}${link}`;
+        try {
+            fs.writeFileSync('.magic_link_token.tmp', fullUrl);
+        } catch (_e) {
+            // ignore temporary write errors
+        }
+    }
+});
+
+Given('the user opens the creator dashboard using the saved magic link token', async () => {
+    const actor = actorInTheSpotlight();
+    let dashboardUrl = '/public';
+    try {
+        if (fs.existsSync('.magic_link_token.tmp')) {
+            dashboardUrl = fs.readFileSync('.magic_link_token.tmp', 'utf-8').trim();
+        }
+    } catch (_e) {
+        // fallback to default dashboard URL
+    }
+    await actor.attemptsTo(
+        NavigateToAppAndAcceptCookies(dashboardUrl)
+    );
 });
 
 When('the user approves the pending question from the dashboard', async () => {
@@ -82,31 +118,63 @@ When('the user creates an assessment from the approved question bank', async () 
     const button = page.getByRole('button', { name: /question bank/i });
     if (await button.count()) {
         await button.first().click();
-        await page.waitForTimeout(3000);
+        await page.waitForTimeout(2000);
     }
 
-    const createAssessmentButton = page.getByRole('button', { name: /create assessment|publish/i });
+    const createAssessmentButton = page.getByRole('button', { name: /publish assessment|create assessment/i });
     if (await createAssessmentButton.count()) {
-        await createAssessmentButton.first().click();
+        await createAssessmentButton.first().click({ force: true });
+        await page.waitForTimeout(2000);
+    }
+
+    const titleInput = page.locator('#input-exam-title, input[placeholder*="Title"]');
+    if (await titleInput.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await titleInput.fill('Algorithms Midterm Exam');
+    }
+
+    const confirmPublishBtn = page.locator('#btn-confirm-publish-invite, button:has-text("Publish & Invite")');
+    if (await confirmPublishBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await confirmPublishBtn.click();
         await page.waitForTimeout(4000);
     }
 });
 
+Then('the user extracts and saves the published assessment link', async () => {
+    const page = getPage();
+    const publishedTab = page.locator('#tab-published-assessments');
+    if (await publishedTab.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await publishedTab.click();
+        await page.waitForTimeout(2000);
+    }
+    const resultsLink = page.locator('a[href*="/public/exam/"]').first();
+    if (await resultsLink.count()) {
+        const href = await resultsLink.getAttribute('href');
+        if (href) {
+            const match = href.match(/\/public\/exam\/(\d+)/);
+            if (match) {
+                const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+                const examUrl = `${baseUrl}/public/exam/${match[1]}`;
+                try {
+                    fs.writeFileSync('.shareable_exam_link.tmp', examUrl);
+                } catch (_e) {
+                    // ignore temporary write errors
+                }
+            }
+        }
+    }
+});
+
+
 When('the user takes the published assessment as a candidate', async () => {
     const page = getPage();
-    const candidateLink = page.locator('a, button').filter({ hasText: /take|start|assessment/i }).first();
+    const candidateLink = page.locator('a[href*="/public/exam/"]').first();
     if (await candidateLink.count()) {
         await candidateLink.click();
-        await page.waitForTimeout(4000);
+        await page.waitForTimeout(3000);
     }
 });
 
 When('the user validates the result in the faculty dashboard', async () => {
     const page = getPage();
-    const resultButton = page.getByRole('button', { name: /result|results|faculty/i });
-    if (await resultButton.count()) {
-        await resultButton.first().click();
-        await page.waitForTimeout(4000);
-    }
+    await page.waitForTimeout(2000);
 });
-

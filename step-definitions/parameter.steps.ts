@@ -2,7 +2,7 @@ import { defineParameterType } from '@cucumber/cucumber';
 import { actorCalled, actorInTheSpotlight } from '@serenity-js/core';
 
 defineParameterType({
-    regexp: /[A-Z][a-z]+/,
+    regexp: /Alex|Alex Student|Faculty|Candidate/,
     transformer(name: string) {
         return actorCalled(name);
     },

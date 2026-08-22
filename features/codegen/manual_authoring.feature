@@ -1,34 +1,31 @@
 Feature: Manual authoring flow on public page
 
-  @manual-authoring @codegen
+  @manual-authoring @codegen @regression
   Scenario: User can open manual authoring and add a question
-    Given the user navigates to "http://localhost:3000/public"
+    Given the user navigates to "/public"
     When the user clicks the button "Manual Authoring"
     Then the authoring text "MANUAL QUESTION AUTHORING" should be visible
-    When the user clicks the button "Add Question"
     Then the authoring text "1 QUESTION IN BLUEPRINT" should be visible
 
-  @manual-authoring @codegen
+  @manual-authoring @codegen @regression
   Scenario: User can create a question and continue to the workspace dashboard
-    Given the user navigates to "http://localhost:3000/public"
+    Given the user navigates to "/public"
     When the user clicks the button "Manual Authoring"
     Then the authoring text "MANUAL QUESTION AUTHORING" should be visible
-    When the user clicks the button "Add Question"
     Then the authoring text "1 QUESTION IN BLUEPRINT" should be visible
     When the user fills the question form with topic "General", stem "What is 2 + 2?", alternatives "3", "4", "5", "6", rationale "Because 2 + 2 equals 4"
-    When the user clicks the button "Proceed to Workspace Dashboard & Deploy"
+    When the user clicks the button "Save to workspace"
     Then the authoring text "Save Your Assessment" should be visible
     And the button "Get Magic Link" should be visible
 
-  @manual-authoring @codegen @e2e
+  @manual-authoring @codegen @e2e @regression
   Scenario: User can complete the end-to-end assessment lifecycle from question creation to result validation
-    Given the user navigates to "http://localhost:3000/public"
+    Given the user navigates to "/public"
     When the user clicks the button "Manual Authoring"
     Then the authoring text "MANUAL QUESTION AUTHORING" should be visible
-    When the user clicks the button "Add Question"
     Then the authoring text "1 QUESTION IN BLUEPRINT" should be visible
     When the user fills the question form with topic "General", stem "What is 2 + 2?", alternatives "3", "4", "5", "6", rationale "Because 2 + 2 equals 4"
-    When the user clicks the button "Proceed to Workspace Dashboard & Deploy"
+    When the user clicks the button "Save to workspace"
     Then the authoring text "Save Your Assessment" should be visible
     When the user enters "qa-e2e@example.com" into the email field
     And the user clicks the button "Get Magic Link"

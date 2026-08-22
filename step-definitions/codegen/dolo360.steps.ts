@@ -2,7 +2,9 @@ import { Then,When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { actorInTheSpotlight } from '@serenity-js/core';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
-import { By, Click, PageElement } from '@serenity-js/web';
+import { By, PageElement } from '@serenity-js/web';
+
+import { ClickWhenReady } from '../helpers/Interactions';
 
 When('the user presses {string} in the element with aria-label {string}', async (key: string, label: string) => {
     const actor = actorInTheSpotlight();
@@ -23,7 +25,7 @@ When('the user presses {string} in the element with aria-label {string}', async 
 
 When('the user adds the first search result to cart', async () => {
     await actorInTheSpotlight().attemptsTo(
-        Click.on(PageElement.located(By.xpath('(//button[@aria-label="Add to cart"])[1]')))
+        ClickWhenReady(PageElement.located(By.xpath('(//button[@aria-label="Add to cart"])[1]')))
     );
 });
 

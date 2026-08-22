@@ -22,5 +22,5 @@ module.exports = {
         'simple-import-sort/exports': 'warn',
         'unused-imports/no-unused-imports': 'warn',
     },
-    ignorePatterns: ['target/', 'node_modules/', 'playwright-report/', 'test-results/', 'generated/'],
+    ignorePatterns: ['target/', 'node_modules/', 'playwright-report/', 'test-results/', 'generated/', 'codegen/'],
 };

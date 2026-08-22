@@ -1,13 +1,17 @@
 import { Given, Then,When } from '@cucumber/cucumber';
 import { Ensure } from '@serenity-js/assertions';
 import { actorInTheSpotlight } from '@serenity-js/core';
-import { By, Click, Enter, isVisible,Navigate, PageElement } from '@serenity-js/web';
+import { isVisible } from '@serenity-js/web';
+import { By,Enter, PageElement } from '@serenity-js/web';
+
+import { ClickWhenReady } from '../helpers/Interactions';
+import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 
 // Generic steps for common actions
 
 Given('the user navigates to {string}', async (url: string) => {
     await actorInTheSpotlight().attemptsTo(
-        Navigate.to(url)
+        NavigateToAppAndAcceptCookies(url)
     );
 });
 
@@ -19,7 +23,7 @@ When('the user enters {string} into the element with aria-label {string}', async
 
 When('the user clicks the element with aria-label {string}', async (label: string) => {
     await actorInTheSpotlight().attemptsTo(
-        Click.on(PageElement.located(By.css(`[aria-label="${label}"]`)))
+        ClickWhenReady(PageElement.located(By.css(`[aria-label="${label}"]`)))
     );
 });
 
