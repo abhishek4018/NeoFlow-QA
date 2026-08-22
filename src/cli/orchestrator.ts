@@ -1,5 +1,6 @@
 import { Page } from '@playwright/test';
 import { execSync } from 'child_process';
+import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -90,8 +91,8 @@ export class AutonomousOrchestrator {
                     continue; // Auto-retry next generation loop
                 }
 
-                const featurePath = path.resolve(process.cwd(), `features/codegen/${flowName}.feature`);
-                const stepsPath = path.resolve(process.cwd(), `step-definitions/codegen/${flowName}.steps.ts`);
+                const featurePath = path.resolve(process.cwd(), `features/quickexamcreator/${flowName}.feature`);
+                const stepsPath = path.resolve(process.cwd(), `step-definitions/quickexamcreator/${flowName}.steps.ts`);
 
                 fs.writeFileSync(featurePath, bdd.feature, 'utf-8');
                 fs.writeFileSync(stepsPath, bdd.steps, 'utf-8');
@@ -101,6 +102,17 @@ export class AutonomousOrchestrator {
                 execSync(`npx cucumber-js --profile default --tags "@${flowName}"`, { stdio: 'pipe' });
 
                 console.log(`✅ [Agent Mode] Test validated and admitted into regression suite!`);
+                this.spkb.markPageExplored(targetUrl);
+
+                // Update care_flows in knowledge base
+                const rawDb = (this.spkb as any).db;
+                if (rawDb) {
+                    const sig = crypto.createHash('sha256').update(bdd.feature).digest('hex');
+                    rawDb.prepare(`
+                        INSERT OR REPLACE INTO care_flows (flow_name, flow_signature, feature_path, steps_path, last_verified_at)
+                        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+                    `).run(flowName, sig, `features/quickexamcreator/${flowName}.feature`, `step-definitions/quickexamcreator/${flowName}.steps.ts`);
+                }
                 
                 // Compile Serenity HTML living report
                 try {
@@ -120,9 +132,10 @@ export class AutonomousOrchestrator {
 
                 if (attempt >= maxHealingAttempts) {
                     console.warn(`❌ [Agent Mode] Discarding unverified draft for ${flowName} to prevent breaking suite.`);
+                    this.spkb.markPageExplored(targetUrl);
                     // Clean up broken draft so regression runner stays clean
-                    const featurePath = path.resolve(process.cwd(), `features/codegen/${flowName}.feature`);
-                    const stepsPath = path.resolve(process.cwd(), `step-definitions/codegen/${flowName}.steps.ts`);
+                    const featurePath = path.resolve(process.cwd(), `features/quickexamcreator/${flowName}.feature`);
+                    const stepsPath = path.resolve(process.cwd(), `step-definitions/quickexamcreator/${flowName}.steps.ts`);
                     if (fs.existsSync(featurePath)) fs.unlinkSync(featurePath);
                     if (fs.existsSync(stepsPath)) fs.unlinkSync(stepsPath);
                 }

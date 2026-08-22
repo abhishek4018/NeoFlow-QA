@@ -53,6 +53,10 @@ export class SPKBDb {
         return stmt.all() as PageNode[];
     }
 
+    public markPageExplored(url: string): void {
+        this.db.prepare(`UPDATE page_nodes SET status = 'explored' WHERE url = ? OR url = ?`).run(url, url.endsWith('/') ? url.slice(0, -1) : url + '/');
+    }
+
     public registerInvariant(invariant: SystemInvariant): void {
         const stmt = this.db.prepare(`
             INSERT OR REPLACE INTO system_invariants (id, type, description, severity, target_scope, expression)
