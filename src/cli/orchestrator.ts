@@ -56,7 +56,28 @@ export class AutonomousOrchestrator {
         // 3. Extract active DOM actions for the current page
         const actions = await this.domExtractor.extractInteractiveElements(page);
         const title = await page.title();
-        const flowName = this.synthesizer.sanitizeFilename(new URL(targetUrl).pathname.replace(/\//g, '') || 'home');
+        const baseFlowName = this.synthesizer.sanitizeFilename(new URL(targetUrl).pathname.replace(/\//g, '') || 'home');
+        let flowName = baseFlowName;
+        let selectedActions = actions;
+
+        // If the base route is already covered, target unexercised interactive action pathways
+        const rawDb = (this.spkb as any).db;
+        if (rawDb) {
+            const isCovered = rawDb.prepare(`SELECT id FROM care_flows WHERE flow_name = ?`).get(baseFlowName);
+            if (isCovered && actions.length > 0) {
+                for (const act of actions) {
+                    const actSlug = this.synthesizer.sanitizeFilename(act.label || '').slice(0, 30);
+                    if (!actSlug || actSlug === baseFlowName) continue;
+                    const candidateFlowName = `${baseFlowName}_${actSlug}`;
+                    const candidateCovered = rawDb.prepare(`SELECT id FROM care_flows WHERE flow_name = ?`).get(candidateFlowName);
+                    if (!candidateCovered) {
+                        flowName = candidateFlowName;
+                        selectedActions = [act, ...actions.filter(a => a !== act)];
+                        break;
+                    }
+                }
+            }
+        }
 
         let generatedScriptPath: string | undefined;
 
@@ -72,12 +93,12 @@ export class AutonomousOrchestrator {
                 console.log(`\n🤖 [Agent Mode Attempt ${attempt}/${maxHealingAttempts}] Synthesizing test assets for [${flowName}]...`);
                 
                 // Stage 1: Generate Raw Playwright Spec
-                const rawSpec = await this.synthesizer.generateRawSpec(targetUrl, title, actions);
+                const rawSpec = await this.synthesizer.generateRawSpec(targetUrl, title, selectedActions);
                 const rawPath = path.resolve(process.cwd(), `codegen/${flowName}_raw.spec.ts`);
                 fs.writeFileSync(rawPath, rawSpec, 'utf-8');
 
                 // Stage 2: Generate Serenity/JS BDD Assets (Deterministic Screenplay AST)
-                const actionSelector = actions.length > 0 ? actions[0].selector : undefined;
+                const actionSelector = selectedActions.length > 0 ? selectedActions[0].selector : undefined;
                 const bdd = await this.synthesizer.generateBDDAssets(flowName, rawSpec, targetUrl, {
                     header: 'h1, h2, h3, header, main, nav, a, button',
                     action: actionSelector
