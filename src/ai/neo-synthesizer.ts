@@ -67,9 +67,9 @@ Raw Script:
 ${rawScript}
 
 Rules:
-1. Include tags: @${flowName} @smoke @e2e
+1. Include tags: @${flowName} @quickexamcreator @vatra
 2. Structure:
-@${flowName} @smoke @e2e
+@${flowName} @quickexamcreator @vatra
 Feature: ${flowName} Flow
 
   Scenario: Validate ${flowName} Page
@@ -82,7 +82,7 @@ Feature: ${flowName} Flow
             const featureMatch = featureOutput.match(/```(?:gherkin|feature)?([\s\S]*?)```/);
             feature = (featureMatch ? featureMatch[1] : featureOutput).trim();
         } catch (error) {
-            feature = `@${flowName} @smoke @e2e
+            feature = `@${flowName} @quickexamcreator @vatra
 Feature: ${flowName} Flow
 
   Scenario: Validate ${flowName} Page

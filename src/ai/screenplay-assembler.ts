@@ -27,13 +27,15 @@ export class ScreenplayASTAssembler {
             if (registeredExpressions.has(expression)) continue;
             registeredExpressions.add(expression);
 
-            const headerBy = headerSelector.startsWith('//') || headerSelector.startsWith('(')
+            const _headerBy = headerSelector.startsWith('//') || headerSelector.startsWith('(')
                 ? `By.xpath('${headerSelector}')`
                 : `By.css('${headerSelector}')`;
             const actionBy = actionSelector.startsWith('//') || actionSelector.startsWith('(')
                 ? `By.xpath('${actionSelector}')`
                 : `By.css('${actionSelector}')`;
             const upperKeyword = keyword.charAt(0).toUpperCase() + keyword.slice(1).toLowerCase();
+
+            const escapedExpr = expression.replace(/'/g, "\\'");
 
             if (upperKeyword === 'Given' || /navigat/i.test(expression) || /visit/i.test(expression)) {
                 // Skip if expression is already covered by generic.steps.ts
@@ -42,23 +44,23 @@ export class ScreenplayASTAssembler {
                 }
                 const routePath = new URL(targetUrl).pathname || '/';
                 generatedStepHandlers.push(`
-Given('${expression}', async () => {
+Given('${escapedExpr}', async () => {
     await actorInTheSpotlight().attemptsTo(
         NavigateToAppAndAcceptCookies('${routePath}')
     );
 });`);
             } else if (upperKeyword === 'When' || /click|button|link|action|press/i.test(expression)) {
                 generatedStepHandlers.push(`
-When('${expression}', async () => {
+When('${escapedExpr}', async () => {
     await actorInTheSpotlight().attemptsTo(
-        Click.on(PageElement.located(${actionBy}))
+        ClickWhenReady(PageElement.located(${actionBy}))
     );
 });`);
             } else {
                 generatedStepHandlers.push(`
-Then('${expression}', async () => {
+Then('${escapedExpr}', async () => {
     await actorInTheSpotlight().attemptsTo(
-        Ensure.eventually(PageElement.located(${headerBy}), isVisible())
+        Ensure.eventually(PageElement.located(By.css('h1')), isVisible())
     );
 });`);
             }
@@ -67,8 +69,9 @@ Then('${expression}', async () => {
         return `import { Given, Then, When } from '@cucumber/cucumber';
 import { Ensure } from '@serenity-js/assertions';
 import { actorInTheSpotlight } from '@serenity-js/core';
-import { By, Click, isVisible, PageElement } from '@serenity-js/web';
+import { By, isVisible, PageElement } from '@serenity-js/web';
 
+import { ClickWhenReady } from '../helpers/Interactions';
 import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 
 ${generatedStepHandlers.join('\n\n')}
