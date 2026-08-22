@@ -35,7 +35,10 @@ export class CareDaemon {
             branchPrefix: this.config.git.branchPrefix
         });
 
-        const browser = await chromium.launch({ headless: true });
+        const browser = await chromium.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        });
         const page = await browser.newPage();
 
         try {
@@ -55,7 +58,57 @@ export class CareDaemon {
         }
     }
 
+    private startReportServer(port: number = 8080): void {
+        const http = require('http');
+        const fs = require('fs');
+        const path = require('path');
+        const reportDir = path.resolve(process.cwd(), 'target/site/serenity');
+
+        const mimeTypes: Record<string, string> = {
+            '.html': 'text/html; charset=utf-8',
+            '.js': 'text/javascript',
+            '.css': 'text/css',
+            '.json': 'application/json',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.svg': 'image/svg+xml',
+            '.ico': 'image/x-icon',
+            '.woff': 'font/woff',
+            '.woff2': 'font/woff2',
+            '.ttf': 'font/ttf'
+        };
+
+        const server = http.createServer((req: any, res: any) => {
+            let reqUrl = (req.url || '/').split('?')[0];
+            if (reqUrl === '/' || reqUrl.endsWith('/')) {
+                reqUrl += 'index.html';
+            }
+            const safePath = path.normalize(reqUrl).replace(/^(\.\.[\/\\])+/, '');
+            const filePath = path.join(reportDir, safePath);
+
+            if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
+                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+                res.end(`<html><body style="font-family:sans-serif;padding:40px;text-align:center;">
+                    <h2>🤖 NeoFlow CARE Daemon Report Server</h2>
+                    <p>Serenity living documentation is being generated...</p>
+                </body></html>`);
+                return;
+            }
+
+            const ext = path.extname(filePath).toLowerCase();
+            const contentType = mimeTypes[ext] || 'application/octet-stream';
+            res.writeHead(200, { 'Content-Type': contentType });
+            fs.createReadStream(filePath).pipe(res);
+        });
+
+        server.listen(port, '0.0.0.0', () => {
+            console.log(`📊 [CARE Daemon] Live Serenity BDD Report Server running at http://0.0.0.0:${port}`);
+        });
+    }
+
     public async start(): Promise<void> {
+        this.startReportServer(8080);
+
         if (this.options.once) {
             await this.executeSingleCycle();
             return;

@@ -100,6 +100,16 @@ export class AutonomousOrchestrator {
                 execSync(`npx cucumber-js --profile default --tags "@${flowName}"`, { stdio: 'pipe' });
 
                 console.log(`✅ [Agent Mode] Test validated and admitted into regression suite!`);
+                
+                // Compile Serenity HTML living report
+                try {
+                    console.log(`📊 [Agent Mode] Compiling Serenity BDD living documentation report...`);
+                    execSync(`npx serenity-bdd run --features ./features`, { stdio: 'pipe' });
+                    console.log(`📑 [Agent Mode] Serenity HTML Report generated at target/site/serenity/index.html`);
+                } catch (reportErr: any) {
+                    console.warn(`⚠️ [Agent Mode] Note: Serenity HTML report compiler notice:`, reportErr?.message);
+                }
+
                 passed = true;
                 generatedScriptPath = rawPath;
             } catch (error: any) {
