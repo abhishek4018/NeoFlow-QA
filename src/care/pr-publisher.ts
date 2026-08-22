@@ -57,8 +57,8 @@ ${flowList}
         try {
             execSync(`git checkout -b ${branchName}`);
             execSync(`git add features/codegen/*.feature step-definitions/codegen/*.steps.ts spkb.db`);
-            execSync(`git commit -m "feat(regression): add ${flows.length} verified BDD flows from CARE"`);
-            execSync(`git push origin ${branchName}`);
+            execSync(`git diff --cached --quiet || git commit -m "feat(regression): add ${flows.length} verified BDD flows from CARE"`);
+            execSync(`git push -u origin ${branchName}`);
 
             const title = `feat(care): automated regression suite update (${flows.length} flows)`;
             const body = this.formatPRBody(flows, stabilityMetrics);

@@ -48,6 +48,29 @@ describe('CARE Config Loader', () => {
         }
     });
 
+    it('loads custom configuration from yaml file', () => {
+        const tmpPath = path.resolve(__dirname, 'temp-care-config.yaml');
+        const customConfig = `
+targetUrl: https://yaml.example.com/app
+safetyLevel: full_crud
+depthLimit: 4
+maxPages: 20
+`;
+        fs.writeFileSync(tmpPath, customConfig, 'utf-8');
+        try {
+            const config = loadCareConfig(tmpPath);
+            assert.strictEqual(config.targetUrl, 'https://yaml.example.com/app');
+            assert.strictEqual(config.safetyLevel, 'full_crud');
+            assert.strictEqual(config.depthLimit, 4);
+            assert.strictEqual(config.maxPages, 20);
+            assert.strictEqual(config.git.baseBranch, 'main');
+        } finally {
+            if (fs.existsSync(tmpPath)) {
+                fs.unlinkSync(tmpPath);
+            }
+        }
+    });
+
     it('falls back to defaults when config file is invalid', () => {
         const tmpPath = path.resolve(__dirname, 'invalid-care-config.json');
         fs.writeFileSync(tmpPath, 'not valid json', 'utf-8');

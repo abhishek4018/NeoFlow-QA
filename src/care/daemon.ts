@@ -12,9 +12,12 @@ export interface DaemonOptions {
     once?: boolean;
 }
 
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 export class CareDaemon {
     private options: DaemonOptions;
     private config: CareConfig;
+    private running: boolean = false;
 
     constructor(options: DaemonOptions = {}) {
         this.options = options;
@@ -61,10 +64,16 @@ export class CareDaemon {
         const intervalMs = (this.options.intervalMinutes || 360) * 60 * 1000;
         console.log(`🕒 [CARE Daemon] Scheduled to run every ${this.options.intervalMinutes || 360} minutes.`);
 
-        await this.executeSingleCycle();
-        setInterval(async () => {
+        this.running = true;
+        while (this.running) {
             await this.executeSingleCycle();
-        }, intervalMs);
+            await sleep(intervalMs);
+        }
+    }
+
+    public stop(): void {
+        this.running = false;
+        console.log(`🛑 [CARE Daemon] Stopping...`);
     }
 }
 

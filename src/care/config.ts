@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as yaml from 'js-yaml';
 
 export interface CareConfig {
     targetUrl: string;
@@ -35,7 +36,12 @@ export function loadCareConfig(configPath?: string): CareConfig {
     if (configPath && fs.existsSync(configPath)) {
         try {
             const raw = fs.readFileSync(configPath, 'utf-8');
-            const parsed = JSON.parse(raw);
+            let parsed: any;
+            if (configPath.endsWith('.yaml') || configPath.endsWith('.yml')) {
+                parsed = yaml.load(raw) || {};
+            } else {
+                parsed = JSON.parse(raw);
+            }
             const merged = { ...DEFAULT_CARE_CONFIG, ...parsed };
             if (!merged.allowedDomains || merged.allowedDomains.length === 0) {
                 try {
@@ -45,8 +51,8 @@ export function loadCareConfig(configPath?: string): CareConfig {
                 }
             }
             return merged;
-        } catch {
-            console.warn(`Could not parse config at ${configPath}, falling back to defaults.`);
+        } catch (e) {
+            console.warn(`Failed to parse config at ${configPath}: ${e instanceof Error ? e.message : String(e)}`);
         }
     }
     const host = new URL(DEFAULT_CARE_CONFIG.targetUrl).hostname;
