@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect,test } from '@playwright/test';
 
 test('search for Sony headphone on Amazon', async ({ page }) => {
   await page.goto('https://www.amazon.com/');

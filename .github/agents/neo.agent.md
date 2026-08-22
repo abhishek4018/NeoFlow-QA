@@ -36,7 +36,11 @@ This agent is the repository-level BDD generation orchestrator for SerenityJS in
 ### Output requirements
 
 - Feature path: `features/codegen/<name>.feature`
-- Step definition path: `features/step-definitions/codegen/<name>.steps.ts`
+- Step definition path: `step-definitions/codegen/<name>.steps.ts`
 - Report generated file paths, duplicate analysis, and common-pattern reuse summary.
 - Provide best-practice warnings and concrete remediation guidance.
-- Optionally run tagged execution when requested.
+- Execute validation run:
+  - `npx cucumber-js --profile default --tags "@<TagName>"`
+  - If step execution fails, self-heal step definitions or locators before declaring completion.
+- Provide Serenity report command if requested:
+  - `npx serenity-bdd run --features ./features`

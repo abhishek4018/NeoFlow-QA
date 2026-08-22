@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect,test } from '@playwright/test';
 
 test('search and add Dolo 360 to cart on 1mg', async ({ page }) => {
   await page.goto('https://www.1mg.com/');

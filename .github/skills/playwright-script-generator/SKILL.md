@@ -63,4 +63,4 @@ Do not:
 
 - Generate a raw Playwright script for checkout flow.
 - Create `codegen/dolo360_raw.spec.ts` and stabilize until pass.
-- Replay and fix flaky selector issues in `codegen/dolo360_raw`.spec.ts.
+- Replay and fix flaky selector issues in `codegen/dolo360_raw.spec.ts`.
