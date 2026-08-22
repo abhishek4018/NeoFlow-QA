@@ -5,8 +5,8 @@ import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
 import { By, Enter, ExecuteScript, isEnabled, isVisible, PageElement, Text } from '@serenity-js/web';
 import * as fs from 'fs';
 
-import { ClickWhenReady } from './helpers/Interactions';
-import { NavigateToAppAndAcceptCookies } from './helpers/Navigation';
+import { ClickWhenReady } from '../helpers/Interactions';
+import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 
 // Page Elements using explicit ID and Accessibility Locators
 const QuickGeneratorTextarea = () => PageElement.located(By.css('textarea')).describedAs('Quick Generator source text input');

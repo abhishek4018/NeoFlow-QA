@@ -4,7 +4,7 @@ import { actorInTheSpotlight, Duration, Wait } from '@serenity-js/core';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
 import { By, Click, isVisible, PageElement, Text } from '@serenity-js/web';
 
-import { NavigateToAppAndAcceptCookies } from './helpers/Navigation';
+import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 
 Given('{actor} navigates to homepage {string}', async (actor, url: string) => {
   await actor.attemptsTo(

@@ -1,7 +1,7 @@
-import * as fs from 'fs';
 import { Given, Then, When } from '@cucumber/cucumber';
 import { actorInTheSpotlight } from '@serenity-js/core';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
+import * as fs from 'fs';
 
 import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 

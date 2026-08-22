@@ -54,7 +54,7 @@ Then('file preview badge for {string} should be visible with a Remove button', a
     await removeBtn.waitFor({ state: 'visible', timeout: 5000 });
 });
 
-When('candidate removes the uploaded document {string}', async (fileName: string) => {
+When('candidate removes the uploaded document {string}', async (_fileName: string) => {
     const page = getPage();
     const removeBtn = page.getByRole('button', { name: /Remove/i });
     await removeBtn.click();

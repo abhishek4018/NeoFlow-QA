@@ -2,7 +2,7 @@ import { Given, Then } from '@cucumber/cucumber';
 import { Ensure, includes } from '@serenity-js/assertions';
 import { By, PageElement, Text } from '@serenity-js/web';
 
-import { NavigateToAppAndAcceptCookies } from './helpers/Navigation';
+import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 
 const PageHeading = () => PageElement.located(By.css('h1')).describedAs('Main Page Heading');
 const FooterElement = () => PageElement.located(By.css('footer')).describedAs('Footer Navigation');
