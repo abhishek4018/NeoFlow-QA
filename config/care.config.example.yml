@@ -1,0 +1,18 @@
+# CARE (Continuous Autonomous Regression Engine) Configuration Example
+targetUrl: https://quickexamcreator.com
+allowedDomains:
+  - quickexamcreator.com
+exclusions:
+  - /logout
+  - /sign-out
+  - /delete
+  - /api/auth/logout
+depthLimit: 2
+maxPages: 10
+safetyLevel: safe_read_only # Options: safe_read_only | full_crud
+storageStatePath: ./auth/storageState.json
+consecutivePassingRunsRequired: 3
+git:
+  autoPr: false
+  baseBranch: main
+  branchPrefix: care/auto-regression-
