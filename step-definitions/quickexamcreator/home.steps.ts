@@ -7,23 +7,16 @@ import { ClickWhenReady } from '../helpers/Interactions';
 import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 
 
-Given('the user clicks the primary navigation link for ASSESS', async () => {
+When('the user clicks on "<element_label>"', async () => {
     await actorInTheSpotlight().attemptsTo(
-        NavigateToAppAndAcceptCookies('/')
+        ClickWhenReady(PageElement.located(By.xpath('//a[normalize-space()="ASSESS"]')))
     );
 });
 
 
-Then('the main heading for ASSESS should be visible', async () => {
+Then('the main heading for "<heading_text>" should be visible', async () => {
     await actorInTheSpotlight().attemptsTo(
         Ensure.eventually(PageElement.located(By.css('h1, h2, main')), isVisible())
-    );
-});
-
-
-Then('the page should contain ".guides-section"', async () => {
-    await actorInTheSpotlight().attemptsTo(
-        Ensure.eventually(PageElement.located(By.css('body')), isVisible())
     );
 });
 

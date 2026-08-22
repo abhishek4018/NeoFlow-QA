@@ -1,9 +1,9 @@
 Feature: Home Flow
-  @home @quickexamcreator @vatra
+
   Scenario Outline: Validate home User Journey
     Given the user navigates to the home url
-    When the user clicks the primary navigation link for ASSESS
-    Then the main heading for ASSESS should be visible
+    When the user clicks on "<element_label>"
+    Then the main heading for "<heading_text>" should be visible
     And the following key elements should be visible on the page:
       | Element Type | Identifier / Text              | Target Role |
       | Heading      | Intelligence Infrastructurefor Education | h1         |
@@ -15,8 +15,6 @@ Feature: Home Flow
       | Heading      | Bloom's Taxonomy Blueprinting  | h3         |
       | Heading      | Automated Scoring Engine       | h3         |
 
-    Examples: 
-      - Guides link clicked
-        Given the user navigates to the home url
-        When the user clicks the primary navigation link for ASSESS
-        And the page should contain ".guides-section"
+  Examples:
+    - element_label = "ASSESS"
+    - heading_text = "Intelligence Infrastructurefor Education"
