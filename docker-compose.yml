@@ -3,6 +3,8 @@ services:
     build: .
     container_name: neoflow-care-daemon
     restart: unless-stopped
+    init: true
+    shm_size: '1gb'
     environment:
       - TARGET_URL=https://quickexamcreator.com
       - NODE_ENV=production
@@ -12,7 +14,9 @@ services:
       - "host.docker.internal:host-gateway"
     volumes:
       - ./target:/app/target
-      - ./spkb.db:/app/spkb.db
+      - ./storage:/app/storage
+      - ./src:/app/src
+      - ./support:/app/support
       - ./codegen:/app/codegen
       - ./features/codegen:/app/features/codegen
       - ./step-definitions/codegen:/app/step-definitions/codegen

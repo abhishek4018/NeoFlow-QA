@@ -78,9 +78,10 @@ BeforeAll(async () => {
         browser = await browserType.connect({ wsEndpoint });
     }
     else {
-        // Launch the browser once before all the tests
+        const isHeadless = process.env.HEADLESS !== 'false';
         browser = await browserType.launch({
-            headless: false,
+            headless: isHeadless,
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
         });
     }
 

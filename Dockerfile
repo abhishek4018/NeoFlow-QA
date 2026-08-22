@@ -1,24 +1,44 @@
-FROM mcr.microsoft.com/playwright:v1.59.1-noble
+# ==========================================
+# Stage 1: Build & Native Addon Compilation
+# ==========================================
+FROM node:22-bookworm-slim AS builder
 
 WORKDIR /app
 
-# Copy dependency manifests
-COPY package*.json tsconfig*.json cucumber.js playwright*.ts ./
+# Install compilation tools for native addons (better-sqlite3)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install build tools for native addons (better-sqlite3) and Java for Serenity BDD reporter
-RUN apt-get update && apt-get install -y build-essential python3 make default-jre && rm -rf /var/lib/apt/lists/*
+COPY package*.json ./
+RUN npm ci && npm rebuild better-sqlite3 --build-from-source
 
-# Install project dependencies
-RUN npm ci
+# ==========================================
+# Stage 2: Lean Production Runtime (~1.2 GB)
+# ==========================================
+FROM node:22-bookworm-slim AS runner
 
-# Copy full application source and tests
+WORKDIR /app
+
+# Install runtime dependencies: headless JRE (for Serenity reports) + essential utilities
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    default-jre-headless \
+    curl \
+    ca-certificates \
+    git \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Copy source and then pre-compiled Linux dependencies from builder
 COPY . .
+COPY --from=builder /app/node_modules ./node_modules
 
-# Environment Defaults
-ENV TARGET_URL="https://quickexamcreator.com"
-ENV DAEMON_INTERVAL_SECONDS=3600
+# Install ONLY Chromium browser binary and its system dependencies
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN npx playwright install --with-deps chromium
 
-# Expose Serenity HTML Report Port
+ENV NODE_ENV=production
 EXPOSE 8080
 
 CMD ["npx", "ts-node", "--transpile-only", "src/care/daemon.ts"]

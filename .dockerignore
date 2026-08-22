@@ -1,0 +1,8 @@
+node_modules
+.git
+.superpowers
+target
+playwright-report
+test-results
+spkb.db
+*.log
