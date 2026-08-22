@@ -102,18 +102,30 @@ export class CareDaemon {
             fs.createReadStream(filePath).pipe(res);
         });
 
-        server.listen(port, '0.0.0.0', () => {
-            console.log(`📊 [CARE Daemon] Live Serenity BDD Report Server running at http://0.0.0.0:${port}`);
+        server.on('error', (err: any) => {
+            if (err.code === 'EADDRINUSE') {
+                console.warn(`ℹ️ [CARE Daemon] Port ${port} is already in use (e.g. by Docker). Skipping embedded report server.`);
+            } else {
+                console.warn(`⚠️ [CARE Daemon] Report server notice:`, err.message);
+            }
         });
+
+        try {
+            server.listen(port, '0.0.0.0', () => {
+                console.log(`📊 [CARE Daemon] Live Serenity BDD Report Server running at http://0.0.0.0:${port}`);
+            });
+        } catch (_e) {
+            // ignore synchronous listen errors
+        }
     }
 
     public async start(): Promise<void> {
-        this.startReportServer(8080);
-
         if (this.options.once) {
             await this.executeSingleCycle();
             return;
         }
+
+        this.startReportServer(Number(process.env.REPORT_PORT) || 8080);
 
         const intervalMs = (this.options.intervalMinutes || 360) * 60 * 1000;
         console.log(`🕒 [CARE Daemon] Scheduled to run every ${this.options.intervalMinutes || 360} minutes.`);
