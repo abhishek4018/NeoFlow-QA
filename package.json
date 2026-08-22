@@ -16,7 +16,8 @@
     "codegen:library:preview": "playwright codegen --target javascript",
     "codegen:playwright-test": "playwright codegen --target playwright-test",
     "care:run": "ts-node --transpile-only src/care/daemon.ts --once",
-    "care:daemon": "ts-node --transpile-only src/care/daemon.ts"
+    "care:daemon": "ts-node --transpile-only src/care/daemon.ts",
+    "care:status": "node -e \"const Database = require('better-sqlite3'); const db = new Database('spkb.db'); const flows = db.prepare('SELECT id, flow_name, feature_path, last_verified_at FROM care_flows ORDER BY id ASC').all(); console.table(flows);\""
   },
   "repository": {
     "type": "git",
