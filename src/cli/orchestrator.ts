@@ -1,12 +1,13 @@
 import { Page } from '@playwright/test';
-import { SPKBDb } from '../spkb/db';
-import { SiteCrawler } from '../explorer/crawler';
-import { DOMExtractor } from '../explorer/dom-extractor';
-import { NeoScriptSynthesizer } from '../ai/neo-synthesizer';
-import { ASTAssertionLinter } from '../auditor/ast-linter';
 import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
+
+import { NeoScriptSynthesizer } from '../ai/neo-synthesizer';
+import { ASTAssertionLinter } from '../auditor/ast-linter';
+import { SiteCrawler } from '../explorer/crawler';
+import { DOMExtractor } from '../explorer/dom-extractor';
+import { SPKBDb } from '../spkb/db';
 
 export interface OrchestratorOptions {
     dbPath?: string;

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { chromium } from '@playwright/test';
+
 import { AutonomousOrchestrator } from './orchestrator';
 
 async function main() {

@@ -1,8 +1,8 @@
-import { When, Then } from '@cucumber/cucumber';
+import { Then,When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { actorInTheSpotlight } from '@serenity-js/core';
-import { By, Click, PageElement } from '@serenity-js/web';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
+import { By, Click, PageElement } from '@serenity-js/web';
 
 When('the user presses {string} in the element with aria-label {string}', async (key: string, label: string) => {
     const actor = actorInTheSpotlight();

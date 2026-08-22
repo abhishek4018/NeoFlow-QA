@@ -1,9 +1,11 @@
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
-import { StateTracker } from '../../src/care/state-tracker';
-import { SPKBDb } from '../../src/spkb/db';
+import { describe, it } from 'node:test';
+
 import * as fs from 'fs';
 import * as path from 'path';
+
+import { StateTracker } from '../../src/care/state-tracker';
+import { SPKBDb } from '../../src/spkb/db';
 
 describe('StateTracker Deduplication', () => {
     const testDbPath = path.resolve(__dirname, 'test-care-state.db');

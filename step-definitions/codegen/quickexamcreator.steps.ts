@@ -1,6 +1,6 @@
-import { When, Then } from '@cucumber/cucumber';
-import { actorInTheSpotlight } from '@serenity-js/core';
+import { Then,When } from '@cucumber/cucumber';
 import { Ensure, includes, isPresent } from '@serenity-js/assertions';
+import { actorInTheSpotlight } from '@serenity-js/core';
 import { By, Click, Page, PageElement } from '@serenity-js/web';
 
 Then('the header with text {string} should be visible', async (text: string) => {

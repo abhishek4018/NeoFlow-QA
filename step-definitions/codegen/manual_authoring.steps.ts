@@ -1,10 +1,6 @@
-import { When, Then } from '@cucumber/cucumber';
+import { Then,When } from '@cucumber/cucumber';
 import { actorInTheSpotlight } from '@serenity-js/core';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
-
-function normalizeText(value: string): string {
-    return value.trim().toLowerCase();
-}
 
 function escapeRegExp(value: string): string {
     return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

@@ -1,5 +1,6 @@
-import { describe, it } from 'node:test';
 import assert from 'node:assert';
+import { describe, it } from 'node:test';
+
 import { StabilityGate } from '../../src/care/stability-gate';
 
 describe('Stability Gate', () => {

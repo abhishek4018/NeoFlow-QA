@@ -1,10 +1,14 @@
 import { chromium } from '@playwright/test';
-import { loadCareConfig, CareConfig } from './config';
+import * as fs from 'fs';
+import * as http from 'http';
+import * as path from 'path';
+
 import { AutonomousOrchestrator } from '../cli/orchestrator';
 import { SPKBDb } from '../spkb/db';
-import { StateTracker, FlowMetadata } from './state-tracker';
-import { StabilityGate } from './stability-gate';
+import { CareConfig, loadCareConfig } from './config';
 import { PRPublisher } from './pr-publisher';
+import { StabilityGate } from './stability-gate';
+import { StateTracker } from './state-tracker';
 
 export interface DaemonOptions {
     configPath?: string;
@@ -26,10 +30,10 @@ export class CareDaemon {
 
     public async executeSingleCycle(): Promise<void> {
         console.log(`\n🚀 [CARE Daemon] Starting autonomous exploration cycle for ${this.config.targetUrl}...`);
-        const db = new SPKBDb('spkb.db');
-        const stateTracker = new StateTracker(db);
-        const stabilityGate = new StabilityGate();
-        const prPublisher = new PRPublisher({
+        const _db = new SPKBDb('spkb.db');
+        const _stateTracker = new StateTracker(_db);
+        const _stabilityGate = new StabilityGate();
+        const _prPublisher = new PRPublisher({
             dryRun: !this.config.git.autoPr,
             baseBranch: this.config.git.baseBranch,
             branchPrefix: this.config.git.branchPrefix
@@ -59,9 +63,6 @@ export class CareDaemon {
     }
 
     private startReportServer(port: number = 8080): void {
-        const http = require('http');
-        const fs = require('fs');
-        const path = require('path');
         const reportDir = path.resolve(process.cwd(), 'target/site/serenity');
 
         const mimeTypes: Record<string, string> = {
@@ -78,12 +79,12 @@ export class CareDaemon {
             '.ttf': 'font/ttf'
         };
 
-        const server = http.createServer((req: any, res: any) => {
+        const server = http.createServer((req: http.IncomingMessage, res: http.ServerResponse) => {
             let reqUrl = (req.url || '/').split('?')[0];
             if (reqUrl === '/' || reqUrl.endsWith('/')) {
                 reqUrl += 'index.html';
             }
-            const safePath = path.normalize(reqUrl).replace(/^(\.\.[\/\\])+/, '');
+            const safePath = path.normalize(reqUrl).replace(/^(\.\.[/\\])+/, '');
             const filePath = path.join(reportDir, safePath);
 
             if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {

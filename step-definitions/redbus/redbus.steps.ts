@@ -1,7 +1,5 @@
-import { Given, When, Then } from '@cucumber/cucumber';
+import {When } from '@cucumber/cucumber';
 import { actorInTheSpotlight } from '@serenity-js/core';
-import { Ensure, equals } from '@serenity-js/assertions';
-import { By, Click, Enter, Navigate, PageElement, Text, isVisible } from '@serenity-js/web';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
 
 When('the user clicks the field with text {string}', async (param0: string) => {

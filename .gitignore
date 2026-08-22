@@ -11,9 +11,19 @@ generated/codegen/*.ts
 
 # Build artifacts
 target
+playwright-report
+test-results
 .gitpod
 .gitpod.yml
 .DS_Store
+
+# State DB & Storage
+spkb.db
+storage/
+
+# Codegen scratch files
+codegen/*.spec.ts
+!codegen/.gitkeep
 
 # Local environment variables
 .env

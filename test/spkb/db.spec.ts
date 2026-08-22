@@ -1,8 +1,9 @@
-import { test, expect } from '@playwright/test';
-import { SPKBDb } from '../../src/spkb/db';
-import { SystemInvariant } from '../../src/spkb/types';
+import { expect,test } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
+
+import { SPKBDb } from '../../src/spkb/db';
+import { SystemInvariant } from '../../src/spkb/types';
 
 test.describe('Single Point Knowledge Base (SPKB) Database Engine', () => {
     const testDbPath = path.join(__dirname, 'test_spkb.db');

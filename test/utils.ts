@@ -1,4 +1,4 @@
-import { Wait, Duration } from '@serenity-js/core';
+import { Duration,Wait } from '@serenity-js/core';
 import { By, isVisible, PageElement } from '@serenity-js/web';
 
 /**

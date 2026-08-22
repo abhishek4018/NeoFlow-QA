@@ -1,7 +1,7 @@
-import { Given, When, Then } from '@cucumber/cucumber';
+import { Given, Then,When } from '@cucumber/cucumber';
+import { Ensure } from '@serenity-js/assertions';
 import { actorInTheSpotlight } from '@serenity-js/core';
-import { Ensure, equals } from '@serenity-js/assertions';
-import { By, Click, Enter, Navigate, PageElement, Text, isVisible } from '@serenity-js/web';
+import { By, Click, Enter, isVisible,Navigate, PageElement } from '@serenity-js/web';
 
 // Generic steps for common actions
 

@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { expect,test } from '@playwright/test';
+
 import { DOMExtractor } from '../../src/explorer/dom-extractor';
 
 test.describe('DOM Extractor for Autonomous Explorer', () => {

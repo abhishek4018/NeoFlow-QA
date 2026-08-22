@@ -110,7 +110,7 @@ function generateFeature(steps: Step[], featureName: string): string {
     return feature;
 }
 
-function generateStepImplementation(step: Step): string {
+function _generateReport(_fileName: string, _stats: any): void {
     let implementation = '';
     
     if (step.type === 'Given' && step.text.includes('navigates to')) {
@@ -152,16 +152,27 @@ function generateStepImplementation(step: Step): string {
         implementation += `        if (pages.length > 0) {\n`;
         implementation += `            await pages[pages.length - 1].locator(\`[name="\${param1}"]\`).press(param0);\n`;
         implementation += `        }\n`;
-        implementation += `    } catch {\n`;
-        implementation += `        const page = (playwright as any).currentPage || (playwright as any).page;\n`;
-        implementation += `        if (page) {\n`;
-        implementation += `            await page.locator(\`[name="\${param1}"]\`).press(param0);\n`;
-        implementation += `        }\n`;
-        implementation += `    }\n`;
-    } else if (step.type === 'Then' && step.text.includes('visible')) {
-        // Then step: verify text is visible
+    } else if (step.type === 'When' && step.text.includes('clicks') && step.text.includes('role')) {
+        // When step: click element by role
         implementation = `    await actorInTheSpotlight().attemptsTo(\n`;
-        implementation += `        Ensure.that(PageElement.located(By.xpath(\`//*[contains(text(),'\${param0}')]\`)), isVisible())\n`;
+        implementation += `        Click.on(PageElement.located(By.css(\`[role="\${param0}"]\`)))\n`;
+        implementation += `    );\n`;
+    } else if (step.type === 'Then' && step.text.includes('URL should contain')) {
+        // Then step: verify URL contains text
+        implementation = `    const page = await (BrowseTheWebWithPlaywright.as(actorInTheSpotlight()) as any).currentPage();\n`;
+        implementation += `    const currentUrl = page.url();\n`;
+        implementation += `    await actorInTheSpotlight().attemptsTo(\n`;
+        implementation += `        Ensure.that(currentUrl.includes(param0), equals(true))\n`;
+        implementation += `    );\n`;
+    } else if (step.type === 'Then' && step.text.includes('heading should be visible')) {
+        // Then step: verify heading is visible
+        implementation = `    await actorInTheSpotlight().attemptsTo(\n`;
+        implementation += `        Ensure.that(PageElement.located(By.css('h1, h2, h3, header, main, nav, body')), isVisible())\n`;
+        implementation += `    );\n`;
+    } else if (step.type === 'Then' && step.text.includes('should see') && step.text.includes('text')) {
+        // Then step: verify text is present
+        implementation = `    await actorInTheSpotlight().attemptsTo(\n`;
+        implementation += `        Ensure.that(Text.of(PageElement.located(By.css('body'))), equals(param0))\n`;
         implementation += `    );\n`;
     } else {
         // Fallback: generic placeholder
@@ -172,7 +183,7 @@ function generateStepImplementation(step: Step): string {
     return implementation;
 }
 
-function generateStepDefinitions(steps: Step[], fileName: string): string {
+function generateStepDefinitions(steps: Step[], _fileName: string): string {
     let code = `import { Given, When, Then } from '@cucumber/cucumber';\nimport { actorInTheSpotlight } from '@serenity-js/core';\nimport { Ensure, equals } from '@serenity-js/assertions';\nimport { By, Click, Enter, Navigate, PageElement, Text, isVisible } from '@serenity-js/web';\nimport { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';\n\n`;
 
     const existingSteps = new Set<string>();

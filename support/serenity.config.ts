@@ -1,8 +1,9 @@
-import { AfterAll, BeforeAll, setDefaultTimeout, Before } from '@cucumber/cucumber';
-import { configure, Duration, actorCalled } from '@serenity-js/core';
-import path from 'path';
+import { AfterAll, Before,BeforeAll, setDefaultTimeout } from '@cucumber/cucumber';
+import { actorCalled,configure, Duration } from '@serenity-js/core';
 import * as dotenv from 'dotenv';
+import path from 'path';
 import * as playwright from 'playwright';
+
 import { Actors } from '../test';
 
 // Load environment variables from .env in the project root.

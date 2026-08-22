@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { expect,test } from '@playwright/test';
+
 import { InvariantsEngine } from '../../src/spkb/invariants-engine';
 import { TelemetryEvent } from '../../src/spkb/types';
 

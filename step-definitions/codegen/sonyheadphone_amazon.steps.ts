@@ -1,8 +1,8 @@
-import { Given, When, Then } from '@cucumber/cucumber';
+import { Given, Then,When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { actorInTheSpotlight } from '@serenity-js/core';
-import { By, Enter, Navigate, PageElement } from '@serenity-js/web';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
+import { By, Enter, Navigate, PageElement } from '@serenity-js/web';
 
 Given('the user opens the Amazon home page', async () => {
     await actorInTheSpotlight().attemptsTo(

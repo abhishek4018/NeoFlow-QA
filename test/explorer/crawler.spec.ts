@@ -1,8 +1,9 @@
-import { test, expect } from '@playwright/test';
-import { SiteCrawler } from '../../src/explorer/crawler';
-import { SPKBDb } from '../../src/spkb/db';
+import { expect,test } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
+
+import { SiteCrawler } from '../../src/explorer/crawler';
+import { SPKBDb } from '../../src/spkb/db';
 
 test.describe('Site Crawler & Invariant Cartographer', () => {
     const testDbPath = path.join(__dirname, 'crawler_test_spkb.db');

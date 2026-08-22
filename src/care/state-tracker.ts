@@ -1,5 +1,6 @@
-import { SPKBDb } from '../spkb/db';
 import * as crypto from 'crypto';
+
+import { SPKBDb } from '../spkb/db';
 
 export interface FlowMetadata {
     flowName: string;

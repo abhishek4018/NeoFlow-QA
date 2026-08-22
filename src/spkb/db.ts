@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
+
 import { INITIAL_SCHEMA } from './schema';
-import { PageNode, TransitionEdge, SystemInvariant, InvariantViolation } from './types';
+import { InvariantViolation,PageNode, SystemInvariant, TransitionEdge } from './types';
 
 export class SPKBDb {
     private db: Database.Database;

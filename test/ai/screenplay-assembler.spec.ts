@@ -1,4 +1,5 @@
-import { test, expect } from '@playwright/test';
+import { expect,test } from '@playwright/test';
+
 import { ScreenplayASTAssembler } from '../../src/ai/screenplay-assembler';
 
 test.describe('Deterministic Hybrid Screenplay AST Assembler', () => {

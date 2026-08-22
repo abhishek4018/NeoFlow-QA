@@ -13,7 +13,7 @@ export class ASTAssertionLinter {
         }
 
         // 2. Check for empty catch blocks
-        const emptyCatchRegex = /catch\s*\([^\)]*\)\s*\{[\s\n\r]*(\/\/[^\n]*|\/\*[\s\S]*?\*\/)?[\s\n\r]*\}/m;
+        const emptyCatchRegex = /catch\s*\([^)]*\)\s*\{[\s\n\r]*(\/\/[^\n]*|\/\*[\s\S]*?\*\/)?[\s\n\r]*\}/m;
         if (emptyCatchRegex.test(code)) {
             errors.push('Forbidden empty catch block detected; silent test passing is not permitted');
         }

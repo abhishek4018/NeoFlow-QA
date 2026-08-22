@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+
 import { InteractiveElementAction } from './types';
 
 export class DOMExtractor {

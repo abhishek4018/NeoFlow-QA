@@ -1,7 +1,8 @@
-import { test, expect } from '@playwright/test';
-import { AutonomousOrchestrator } from '../../src/cli/orchestrator';
+import { expect,test } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
+
+import { AutonomousOrchestrator } from '../../src/cli/orchestrator';
 
 test.describe('Autonomous Quality Engine Orchestrator', () => {
     const testDbPath = path.join(__dirname, 'orchestrator_test_spkb.db');

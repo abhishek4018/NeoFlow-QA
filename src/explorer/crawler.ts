@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+
 import { SPKBDb } from '../spkb/db';
 import { InvariantsEngine } from '../spkb/invariants-engine';
 import { TelemetryEvent } from '../spkb/types';
