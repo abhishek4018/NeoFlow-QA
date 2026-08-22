@@ -4,7 +4,7 @@
   "description": "Agentic BDD Automation Engine combining Serenity/JS, Cucumber, Playwright, and AI Workflows",
   "main": "index.js",
   "scripts": {
-    "clean": "rimraf target",
+    "clean": "rimraf target/*",
     "test": "failsafe clean test:execute test:report",
     "test:execute": "cucumber-js",
     "test:report": "serenity-bdd run --features ./features",
