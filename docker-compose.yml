@@ -1,11 +1,11 @@
 services:
-  neoflow-aqe:
+  neoflow-care-daemon:
     build: .
-    container_name: neoflow-aqe-worker
-    restart: always
+    container_name: neoflow-care-daemon
+    restart: unless-stopped
     environment:
       - TARGET_URL=https://quickexamcreator.com
-      - DAEMON_INTERVAL_SECONDS=600
+      - NODE_ENV=production
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
       - OLLAMA_MODEL=llama3.2:3b
     extra_hosts:
