@@ -1,6 +1,5 @@
-@home @quickexamcreator @vatra
-Feature: home Flow
-
+Feature: Home Flow
+  @home @quickexamcreator @vatra
   Scenario Outline: Validate home User Journey
     Given the user navigates to the home url
     When the user clicks the primary navigation link for ASSESS
@@ -16,5 +15,8 @@ Feature: home Flow
       | Heading      | Bloom's Taxonomy Blueprinting  | h3         |
       | Heading      | Automated Scoring Engine       | h3         |
 
-    Examples:
-      - ASSESS
+    Examples: 
+      - Guides link clicked
+        Given the user navigates to the home url
+        When the user clicks the primary navigation link for ASSESS
+        And the page should contain ".guides-section"
