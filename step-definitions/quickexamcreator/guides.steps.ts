@@ -3,11 +3,6 @@ import { Ensure } from '@serenity-js/assertions';
 import { actorInTheSpotlight } from '@serenity-js/core';
 import { By, isVisible, Navigate, PageElement } from '@serenity-js/web';
 
-Given('the user navigates to the guides url', async () => {
-    await actorInTheSpotlight().attemptsTo(
-        Navigate.to('https://quickexamcreator.com/guides')
-    );
-});
 
 Then('the main heading for guides should be visible with title "Vatra Assess | Intelligence Infrastructure for Education"', async () => {
     await actorInTheSpotlight().attemptsTo(

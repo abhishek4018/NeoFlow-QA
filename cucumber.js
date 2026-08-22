@@ -10,6 +10,7 @@ module.exports = {
         `--format "@serenity-js/cucumber"`,                 // use Serenity/JS Cucumber adapter - https://serenity-js.org/modules/cucumber/
         `--format-options '{"specDirectory": "features"}'`, // configure the adapter
         `--require "./step-definitions/**/*.steps.ts"`,             // load step definition libraries
-        `--require './support/*.config.ts'`              // load configuration files, such as features/support/
+        `--require './support/*.config.ts'`,              // load configuration files, such as features/support/
+        `features/**/*.feature`
     ].join(' ')
 };

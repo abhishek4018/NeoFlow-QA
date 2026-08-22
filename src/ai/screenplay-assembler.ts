@@ -36,10 +36,15 @@ export class ScreenplayASTAssembler {
             const upperKeyword = keyword.charAt(0).toUpperCase() + keyword.slice(1).toLowerCase();
 
             if (upperKeyword === 'Given' || /navigat/i.test(expression) || /visit/i.test(expression)) {
+                // Skip if expression is already covered by generic.steps.ts
+                if (/^the user navigates to the \w+ url$/i.test(expression) || /^the user navigates to "/i.test(expression)) {
+                    continue;
+                }
+                const routePath = new URL(targetUrl).pathname || '/';
                 generatedStepHandlers.push(`
 Given('${expression}', async () => {
     await actorInTheSpotlight().attemptsTo(
-        Navigate.to('${targetUrl}')
+        NavigateToAppAndAcceptCookies('${routePath}')
     );
 });`);
             } else if (upperKeyword === 'When' || /click|button|link|action|press/i.test(expression)) {
@@ -59,11 +64,14 @@ Then('${expression}', async () => {
             }
         }
 
-        const imports = `import { Given, When, Then } from '@cucumber/cucumber';
-import { actorInTheSpotlight } from '@serenity-js/core';
+        return `import { Given, Then, When } from '@cucumber/cucumber';
 import { Ensure } from '@serenity-js/assertions';
-import { By, Click, isVisible, Navigate, PageElement } from '@serenity-js/web';\n`;
+import { actorInTheSpotlight } from '@serenity-js/core';
+import { By, Click, isVisible, PageElement } from '@serenity-js/web';
 
-        return imports + generatedStepHandlers.join('\n') + '\n';
+import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
+
+${generatedStepHandlers.join('\n\n')}
+` + '\n';
     }
 }

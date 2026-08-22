@@ -15,6 +15,18 @@ Given('the user navigates to {string}', async (url: string) => {
     );
 });
 
+Given('the user navigates to the {word} url', async (pageName: string) => {
+    await actorInTheSpotlight().attemptsTo(
+        NavigateToAppAndAcceptCookies(`/${pageName}`)
+    );
+});
+
+Given('the user navigates to the {string} page', async (pageName: string) => {
+    await actorInTheSpotlight().attemptsTo(
+        NavigateToAppAndAcceptCookies(pageName)
+    );
+});
+
 When('the user enters {string} into the element with aria-label {string}', async (value: string, label: string) => {
     await actorInTheSpotlight().attemptsTo(
         Enter.theValue(value).into(PageElement.located(By.css(`[aria-label="${label}"]`)))
