@@ -21,7 +21,7 @@ export class SPKBDb {
             VALUES (?, ?, ?, ?, ?)
             ON CONFLICT(url) DO UPDATE SET
                 title=excluded.title,
-                status=excluded.status
+                status=CASE WHEN page_nodes.status = 'explored' THEN 'explored' ELSE excluded.status END
             RETURNING id
         `);
         const row = stmt.get(node.url, node.title, node.routePath, node.discoveredAt, node.status) as { id: number };
