@@ -127,13 +127,18 @@ export class CareDaemon {
 
         this.startReportServer(Number(process.env.REPORT_PORT) || 8080);
 
-        const intervalMs = (this.options.intervalMinutes || 360) * 60 * 1000;
-        console.log(`🕒 [CARE Daemon] Scheduled to run every ${this.options.intervalMinutes || 360} minutes.`);
+        const defaultInterval = Number(process.env.CARE_INTERVAL_MINUTES) || 5;
+        const intervalMinutes = this.options.intervalMinutes || defaultInterval;
+        const intervalMs = intervalMinutes * 60 * 1000;
+        console.log(`🕒 [CARE Daemon] Scheduled to run every ${intervalMinutes} minutes.`);
 
         this.running = true;
         while (this.running) {
             await this.executeSingleCycle();
-            await sleep(intervalMs);
+            if (this.running) {
+                console.log(`⏳ [CARE Daemon] Sleeping for ${intervalMinutes} minutes until next exploration cycle...`);
+                await sleep(intervalMs);
+            }
         }
     }
 
@@ -145,6 +150,8 @@ export class CareDaemon {
 
 if (require.main === module) {
     const isOnce = process.argv.includes('--once');
-    const daemon = new CareDaemon({ once: isOnce });
+    const intervalArgIdx = process.argv.indexOf('--interval');
+    const intervalMinutes = intervalArgIdx !== -1 ? Number(process.argv[intervalArgIdx + 1]) : undefined;
+    const daemon = new CareDaemon({ once: isOnce, intervalMinutes });
     daemon.start();
 }
