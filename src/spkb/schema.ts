@@ -40,4 +40,14 @@ CREATE TABLE IF NOT EXISTS invariant_violations (
     FOREIGN KEY(invariant_id) REFERENCES system_invariants(id),
     FOREIGN KEY(page_node_id) REFERENCES page_nodes(id)
 );
+
+CREATE TABLE IF NOT EXISTS care_flows (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    flow_name TEXT UNIQUE,
+    flow_signature TEXT UNIQUE,
+    feature_path TEXT,
+    steps_path TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_verified_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
 `;
