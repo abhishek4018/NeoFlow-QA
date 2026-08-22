@@ -56,7 +56,12 @@ ${actionSnippet}
         }
     }
 
-    public async generateBDDAssets(flowName: string, rawScript: string, targetUrl?: string, selectors?: { header?: string; action?: string }): Promise<{ feature: string; steps: string }> {
+    public async generateBDDAssets(
+        flowName: string,
+        rawScript: string,
+        targetUrl?: string,
+        selectors?: { header?: string; action?: string; actions?: InteractiveElementAction[] }
+    ): Promise<{ feature: string; steps: string }> {
         let feature = '';
 
         try {
@@ -76,7 +81,8 @@ Feature: ${flowName} Flow
     Given the user navigates to the ${flowName} url
     Then the main heading for ${flowName} should be visible
     When the user clicks the primary navigation link for ${flowName}
-3. Return ONLY valid Gherkin text. No markdown explanation.
+3. Never output hardcoded URLs in Given steps. Always use: "Given the user navigates to the ${flowName} url"
+4. Return ONLY valid Gherkin text. No markdown explanation.
 `;
             const featureOutput = await this.llm.generate(featurePrompt);
             const featureMatch = featureOutput.match(/```(?:gherkin|feature)?([\s\S]*?)```/);

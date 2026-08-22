@@ -101,7 +101,8 @@ export class AutonomousOrchestrator {
                 const actionSelector = selectedActions.length > 0 ? selectedActions[0].selector : undefined;
                 const bdd = await this.synthesizer.generateBDDAssets(flowName, rawSpec, targetUrl, {
                     header: 'h1, h2, h3, header, main, nav, a, button',
-                    action: actionSelector
+                    action: actionSelector,
+                    actions: selectedActions
                 });
                 
                 // Stage 2.5: AST Assertion Linting Gate
