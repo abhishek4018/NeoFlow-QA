@@ -53,8 +53,9 @@ export class AutonomousOrchestrator {
             maxPages: this.options.maxPages || 5
         });
 
-        // 3. Extract active DOM actions for the current page
+        // 3. Extract active DOM actions and structural page inventory for the current page
         const actions = await this.domExtractor.extractInteractiveElements(page);
+        const inventory = await this.domExtractor.extractPageInventory(page);
         const title = await page.title();
         const baseFlowName = this.synthesizer.sanitizeFilename(new URL(targetUrl).pathname.replace(/\//g, '') || 'home');
         let flowName = baseFlowName;
@@ -105,7 +106,8 @@ export class AutonomousOrchestrator {
                     action: actionSelector,
                     actions: selectedActions,
                     baseRouteName: baseFlowName,
-                    actionLabel
+                    actionLabel,
+                    inventory
                 });
                 
                 // Stage 2.5: AST Assertion Linting Gate

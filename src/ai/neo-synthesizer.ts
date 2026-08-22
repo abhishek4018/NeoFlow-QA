@@ -60,11 +60,28 @@ ${actionSnippet}
         flowName: string,
         rawScript: string,
         targetUrl?: string,
-        selectors?: { header?: string; action?: string; actions?: InteractiveElementAction[]; baseRouteName?: string; actionLabel?: string }
+        selectors?: {
+            header?: string;
+            action?: string;
+            actions?: InteractiveElementAction[];
+            baseRouteName?: string;
+            actionLabel?: string;
+            inventory?: import('../explorer/types').PageElementInventory;
+        }
     ): Promise<{ feature: string; steps: string }> {
         let feature = '';
         const baseRoute = selectors?.baseRouteName || 'home';
         const actionLabel = selectors?.actionLabel || flowName;
+        const inventory = selectors?.inventory;
+
+        let dataTableBlock = '';
+        if (inventory && inventory.items && inventory.items.length > 0) {
+            const tableRows = inventory.items.slice(0, 8).map(
+                item => `      | ${item.elementType.padEnd(12)} | ${item.identifier.padEnd(30)} | ${(item.targetRole || item.elementType).padEnd(10)} |`
+            ).join('\n');
+
+            dataTableBlock = `\n    And the following key elements should be visible on the page:\n      | Element Type | Identifier / Text              | Target Role |\n${tableRows}`;
+        }
 
         try {
             const featurePrompt = `
@@ -82,7 +99,7 @@ Feature: ${flowName} Flow
   Scenario: Validate ${flowName} User Journey
     Given the user navigates to the ${baseRoute} url
     When the user clicks the primary navigation link for ${actionLabel}
-    Then the main heading for ${actionLabel} should be visible
+    Then the main heading for ${actionLabel} should be visible${dataTableBlock}
 3. Always navigate to the starting page using: "Given the user navigates to the ${baseRoute} url"
 4. Return ONLY valid Gherkin text. No markdown explanation.
 `;
@@ -96,7 +113,7 @@ Feature: ${flowName} Flow
   Scenario: Validate ${flowName} User Journey
     Given the user navigates to the ${baseRoute} url
     When the user clicks the primary navigation link for ${actionLabel}
-    Then the main heading for ${actionLabel} should be visible
+    Then the main heading for ${actionLabel} should be visible${dataTableBlock}
 `;
         }
 

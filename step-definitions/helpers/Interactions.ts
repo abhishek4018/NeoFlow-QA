@@ -52,3 +52,42 @@ export const ClickWhenReady = (
         }
     }
 );
+
+/**
+ * Verifies that a target UI element is present and visible in the DOM.
+ */
+export const CheckElementPresent = (
+    role: string,
+    identifier: string,
+    maxWait: Duration = Duration.ofSeconds(10)
+) => Interaction.where(`#actor verifies presence of ${role} '${identifier}'`,
+    async actor => {
+        const playwright = actor.abilityTo(BrowseTheWebWithPlaywright) as any;
+        const session = playwright.session;
+        const current = session?.currentBrowserPage;
+        const context = playwright.browserContext || playwright.context;
+        const pages = context?.pages?.() || [];
+        const page = current?.page || pages[pages.length - 1];
+        if (!page) {
+            throw new Error('❌ Could not resolve Playwright page');
+        }
+
+        const normalizedRole = role.toLowerCase();
+        let locator;
+
+        if (normalizedRole === 'h1' || normalizedRole === 'h2' || normalizedRole === 'h3' || normalizedRole === 'heading') {
+            locator = page.locator(`xpath=//h1[contains(normalize-space(), "${identifier}")] | //h2[contains(normalize-space(), "${identifier}")] | //h3[contains(normalize-space(), "${identifier}")] | //*[self::h1 or self::h2 or self::h3][contains(., "${identifier}")]`).first();
+        } else if (normalizedRole === 'button') {
+            locator = page.locator(`xpath=//button[contains(normalize-space(), "${identifier}") or @aria-label="${identifier}"] | //input[@type="submit" and contains(@value, "${identifier}")]`).first();
+        } else if (normalizedRole === 'link') {
+            locator = page.locator(`xpath=//a[contains(normalize-space(), "${identifier}") or contains(@href, "${identifier}") or @aria-label="${identifier}"]`).first();
+        } else if (normalizedRole === 'input' || normalizedRole === 'textarea') {
+            locator = page.locator(`xpath=//input[contains(@placeholder, "${identifier}") or contains(@name, "${identifier}") or contains(@aria-label, "${identifier}")] | //textarea[contains(@placeholder, "${identifier}") or contains(@name, "${identifier}") or contains(@aria-label, "${identifier}")] | //input | //textarea`).first();
+        } else {
+            locator = page.locator(`xpath=//*[contains(normalize-space(), "${identifier}")]`).first();
+        }
+
+        await locator.waitFor({ state: 'attached', timeout: maxWait.inMilliseconds() });
+        await locator.waitFor({ state: 'visible', timeout: maxWait.inMilliseconds() });
+    }
+);

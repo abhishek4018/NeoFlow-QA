@@ -47,6 +47,10 @@ Given('${escapedExpr}', async () => {
     );
 });`);
             } 
+            // Skip DataTable step since it is implemented generically in generic.steps.ts
+            else if (/the following key elements should be visible/i.test(expression)) {
+                continue;
+            } 
             // 2. Action Steps: Map distinct action selectors for each interaction
             else if (upperKeyword === 'When' || /click|button|link|action|press|enter|type/i.test(expression)) {
                 const currentAction = actions[actionCursor] || (selectors.action ? { selector: selectors.action, actionType: 'click' } : undefined);
