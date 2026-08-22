@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  care-daemon:
+    build:
+      context: .
+      dockerfile: Dockerfile.care
+    container_name: neoflow-care-daemon
+    restart: unless-stopped
+    environment:
+      - TARGET_URL=https://quickexamcreator.com
+      - NODE_ENV=production
+    volumes:
+      - ./storage:/workspace/storage
+      - ./features/codegen:/workspace/features/codegen
+      - ./step-definitions/codegen:/workspace/step-definitions/codegen
+      - ./codegen:/workspace/codegen

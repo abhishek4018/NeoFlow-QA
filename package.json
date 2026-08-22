@@ -14,7 +14,9 @@
     "codegen": "playwright codegen",
     "codegen:library": "mkdirp generated/codegen && playwright codegen --target javascript -o generated/codegen/recording.ts",
     "codegen:library:preview": "playwright codegen --target javascript",
-    "codegen:playwright-test": "playwright codegen --target playwright-test"
+    "codegen:playwright-test": "playwright codegen --target playwright-test",
+    "care:run": "ts-node --transpile-only src/care/daemon.ts --once",
+    "care:daemon": "ts-node --transpile-only src/care/daemon.ts"
   },
   "repository": {
     "type": "git",
