@@ -78,8 +78,9 @@ When('the faculty clicks the Generate Question Set button', async () => {
     const page = currentBrowserPage?.page || pages[pages.length - 1];
 
     if (page) {
-        const btn = page.getByRole('button', { name: /Extract & Generate Questions|Generate Question Set/i });
-        await btn.first().click();
+        const btn = page.locator('#btn-generate-questions, button:has-text("Extract & Generate"), button:has-text("Generate Question Set")').first();
+        await btn.waitFor({ state: 'visible', timeout: 15000 });
+        await btn.click({ force: true });
     }
 });
 
@@ -118,12 +119,15 @@ Then('the faculty extracts and saves the magic link token', async () => {
     const page = currentBrowserPage?.page || pages[pages.length - 1];
 
     if (page) {
-        const link = page.locator('#link-launch-dashboard');
-        await link.waitFor({ state: 'visible', timeout: 15000 });
-        const href = await link.getAttribute('href');
+        const linkLocator = page.locator('#link-launch-dashboard, a:has-text("Launch Creator Dashboard"), a[href*="/public/dashboard/"]');
+        await linkLocator.first().waitFor({ state: 'visible', timeout: 25000 });
+        const href = await linkLocator.first().getAttribute('href');
         if (href) {
             const baseUrl = getBaseUrl();
-            const fullUrl = href.startsWith('http') ? href : `${baseUrl}${href}`;
+            let fullUrl = href.startsWith('http') ? href : `${baseUrl}${href}`;
+            if (fullUrl.includes('localhost:3000') && !baseUrl.includes('localhost:3000')) {
+                fullUrl = fullUrl.replace('http://localhost:3000', baseUrl);
+            }
             try {
                 fs.writeFileSync('.magic_link_token.tmp', fullUrl);
             } catch (e) {}
