@@ -1,8 +1,5 @@
 FROM mcr.microsoft.com/playwright:v1.59.1-jammy
 
-# Install Java JRE required by Serenity BDD report CLI
-RUN apt-get update && apt-get install -y openjdk-17-jre-headless && rm -rf /var/lib/apt/lists/*
-
 # Set working directory
 WORKDIR /app
 
@@ -21,5 +18,5 @@ ENV HEADLESS=true
 # Create report destination directory
 RUN mkdir -p target/site/serenity
 
-# Entrypoint to execute Cucumber test suite and compile Serenity BDD HTML report
-CMD ["sh", "-c", "npm run clean && npx cucumber-js --tags \"@smoke\" && npm run test:report"]
+# Entrypoint to execute Cucumber test suite and generate Serenity/JS HTML report
+CMD ["sh", "-c", "npm run clean && npx cucumber-js --tags \"@smoke\""]

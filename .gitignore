@@ -19,3 +19,7 @@ target
 .env
 
 .magic_link_token.tmp
+
+# Playwright reports and test results
+playwright-report/
+test-results/

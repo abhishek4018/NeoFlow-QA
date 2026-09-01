@@ -73,17 +73,38 @@ When('the user opens the creator dashboard from the magic link', async () => {
         throw new Error('Could not find the Launch Creator Dashboard link');
     }
 
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-    const fullUrl = link.startsWith('http') ? link : `${baseUrl}${link}`;
-    await page.goto(fullUrl, { waitUntil: 'networkidle', timeout: 120000 });
+    const env = process.env.ENVIRONMENT || 'uat';
+    const baseUrls: Record<string, string> = {
+        dev: 'http://localhost:3000',
+        qa: 'https://uat.quickexamcreator.com',
+        uat: 'https://uat.quickexamcreator.com',
+        prod: 'https://quickexamcreator.com',
+    };
+    const baseUrl = process.env.BASE_URL || baseUrls[env] || 'https://uat.quickexamcreator.com';
+    let fullUrl = link.startsWith('http') ? link : `${baseUrl}${link}`;
+    // If link came with localhost from mock backend, rewrite to baseUrl
+    if (fullUrl.includes('localhost:3000') && !baseUrl.includes('localhost:3000')) {
+        fullUrl = fullUrl.replace('http://localhost:3000', baseUrl);
+    }
+    await page.goto(fullUrl, { waitUntil: 'domcontentloaded', timeout: 120000 });
 });
 
 Then('the user extracts and saves the magic link token', async () => {
     const page = getPage();
     const link = await page.locator('a', { hasText: /launch creator dashboard/i }).first().getAttribute('href');
     if (link) {
-        const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
-    const fullUrl = link.startsWith('http') ? link : `${baseUrl}${link}`;
+        const env = process.env.ENVIRONMENT || 'uat';
+        const baseUrls: Record<string, string> = {
+            dev: 'http://localhost:3000',
+            qa: 'https://uat.quickexamcreator.com',
+            uat: 'https://uat.quickexamcreator.com',
+            prod: 'https://quickexamcreator.com',
+        };
+        const baseUrl = process.env.BASE_URL || baseUrls[env] || 'https://uat.quickexamcreator.com';
+        let fullUrl = link.startsWith('http') ? link : `${baseUrl}${link}`;
+        if (fullUrl.includes('localhost:3000') && !baseUrl.includes('localhost:3000')) {
+            fullUrl = fullUrl.replace('http://localhost:3000', baseUrl);
+        }
         try {
             require('fs').writeFileSync('.magic_link_token.tmp', fullUrl);
         } catch (e) {}

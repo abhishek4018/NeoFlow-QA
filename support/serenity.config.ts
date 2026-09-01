@@ -74,9 +74,13 @@ BeforeAll(async () => {
             [ '@serenity-js/console-reporter', { theme: 'auto' } ],
             [ '@serenity-js/web:Photographer', { strategy: 'TakePhotosOfFailures' } ],
             [ '@serenity-js/core:ArtifactArchiver', { outputDirectory: path.resolve(process.cwd(), 'target/site/serenity') } ],
-            [ '@serenity-js/serenity-bdd', { 
+            // Built-in HTML Reporter: generates standalone interactive report & living docs without Java CLI dependencies
+            [ '@serenity-js/html-reporter', { 
+                outputDirectory: path.resolve(process.cwd(), 'target/site/serenity'), 
+                title: 'Pariksha Assessment Engine E2E Suite', 
                 specDirectory: path.resolve(process.cwd(), 'features'),
-                project: 'My Custom Project Name'
+                maxHistory: 10,
+                consistencyWindow: 5,
             } ],
         ],
 
