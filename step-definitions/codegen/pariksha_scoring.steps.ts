@@ -37,10 +37,20 @@ When('candidate registers with first name {string}', async (firstName: string) =
             await examCardLink.click();
             await page.waitForTimeout(1500);
         }
+
+        const firstNameInput = page.locator('#firstName, input[name="firstName"], input[placeholder*="First Name"], input[placeholder*="Name"]').first();
+        if (await firstNameInput.isVisible({ timeout: 15000 }).catch(() => false)) {
+            await firstNameInput.fill(firstName);
+            const startBtn = page.locator('#btn-start-assessment, button:has-text("Start Assessment")').first();
+            if (await startBtn.isVisible({ timeout: 5000 }).catch(() => false)) {
+                await startBtn.click({ force: true });
+                return;
+            }
+        }
     }
 
     await actor.attemptsTo(
-        Wait.upTo(Duration.ofSeconds(60)).until(CandidateFirstNameInput(), isVisible()),
+        Wait.upTo(Duration.ofSeconds(20)).until(CandidateFirstNameInput(), isVisible()),
         Enter.theValue(firstName).into(CandidateFirstNameInput()),
         Wait.upTo(Duration.ofSeconds(15)).until(StartAssessmentButton(), isEnabled()),
         ClickWhenReady(StartAssessmentButton())
@@ -93,17 +103,17 @@ When('candidate answers all questions of multiple types in the player', async ()
             break;
         }
 
-        // Fill current question answer
-        const numInput = page.locator('input[type="number"]').first();
-        const textInput = page.locator('input[type="text"], textarea').first();
-        const optionBtn = page.locator('button.option-btn, button[class*="choice"], button[class*="option"], label').first();
+        // Fill current question answer inside player container
+        const numInput = page.locator('input[type="number"]:not([disabled])').first();
+        const textInput = page.locator('main textarea:not([disabled]), main input[type="text"]:not([disabled]):not(#firstName), textarea:not([disabled])').first();
+        const optionBtn = page.locator('button.option-btn, button[class*="choice"], button[class*="option"], label.cursor-pointer').first();
 
-        if (await numInput.isVisible({ timeout: 300 }).catch(() => false)) {
-            await numInput.fill('1947');
+        if (await optionBtn.isVisible({ timeout: 400 }).catch(() => false)) {
+            await optionBtn.click({ force: true }).catch(() => {});
+        } else if (await numInput.isVisible({ timeout: 300 }).catch(() => false)) {
+            await numInput.fill('1947').catch(() => {});
         } else if (await textInput.isVisible({ timeout: 300 }).catch(() => false)) {
-            await textInput.fill('Sample Answer');
-        } else if (await optionBtn.isVisible({ timeout: 300 }).catch(() => false)) {
-            await optionBtn.click({ force: true });
+            await textInput.fill('Sample Answer').catch(() => {});
         }
 
         const nextBtn = page.getByRole('button', { name: /^Next$/i });
