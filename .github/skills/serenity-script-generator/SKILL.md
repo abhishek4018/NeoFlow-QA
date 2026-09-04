@@ -1,9 +1,40 @@
+---
 name: serenity-script-generator
 description: "Use when: generating SerenityJS BDD assets, creating feature files and step definitions directly from a passing raw Playwright script, intelligently extracting locators and actions using Serenity Screenplay pattern, applying duplicate-step detection and common-pattern analysis, validating best-practice patterns, scaffolding features/codegen and step-definitions/codegen outputs, applying Cucumber tag conventions, and executing cucumber-js plus serenity-bdd reporting flow in this repository."
+required-skills: ["serenity-js-mandatory-steps"]
+---
+
+## Mandatory Steps
+
+1. **Use SerenityJS Interaction Helpers**
+   - Prefer `ClickWhenReady` (or other custom interaction helpers) over raw `Click.on` or direct Playwright calls.
+   - Use `Enter`, `Navigate`, `Wait`, `Ensure`, `Text`, and other SerenityJS primitives for all UI interactions.
+
+2. **Avoid Direct Playwright Page Manipulation**
+   - Do **not** access `page.locator` or `page.click` directly inside step definitions.
+   - When low‑level Playwright actions are required, wrap them in a SerenityJS `Interaction` that can be reused.
+
+3. **Explicit Waits**
+   - Always pair an action with an explicit wait (e.g., `Wait.upTo(Duration.ofSeconds(...)).until(element, isVisible())`).
+   - Use `isEnabled`, `isVisible`, or custom conditions before interacting.
+
+4. **Navigation Helper**
+   - Use the shared `NavigateToAppAndAcceptCookies(url)` helper for any navigation that may involve a cookie banner.
+
+5. **Consistent Element Locators**
+   - Define element locators as **named functions** returning `PageElement.located(By....)`.
+   - Keep locator definitions in a single file per domain (e.g., `helpers/Elements.ts`).
+
+6. **Error Handling**
+   - Throw descriptive errors using SerenityJS `AssertionError` or custom error classes.
+   - Wrap fragile actions in try/catch blocks and log using `actor.attemptsTo(LogMessage…)` if needed.
+
+7. **Documentation**
+   - Add JSDoc comments to each step definition explaining the purpose, parameters, and any special conditions.
 
 # Serenity Script Generator
 
-Generate Serenity-compatible feature and step-definition artifacts from validated raw scripts.
+Generate Serenity-compatible feature and step-definition artifacts for this repository.
 
 ## Scope
 
@@ -30,7 +61,7 @@ Do not:
 ## Required Inputs
 - Passing raw script path in `codegen/`.
 - Feature title.
-- Tag name (for example `@LoginFlow`).
+- Tag name (for example `@LoginFlow` or `@smoke`).
 - Generation mode (`auto` by default, `interactive` when selector capture assistance is needed).
 
 ## Generation Method (Direct Intelligence & Screenplay Pattern)
@@ -56,9 +87,9 @@ Required capability parity with the converter:
 
 ## Execution Commands
 - Execute Cucumber tests:
-  `npx cucumber-js --profile default --tags "@TagName"`
+  `ENVIRONMENT=uat npx cucumber-js --profile default --tags "@TagName"`
 - Generate and view Serenity BDD HTML Report:
-  `npm run clean && npx cucumber-js --profile default --tags "@TagName" && npx serenity-bdd run --features ./features`
+  `npm run test:report`
 
 ## Output Rules
 - Feature file: `features/codegen/<name>.feature`
@@ -89,8 +120,3 @@ Required capability parity with the converter:
 - Direct generation summary includes duplicate analysis, reused/common patterns, and skipped conflicts.
 - Best-practice findings are surfaced with concrete remediation guidance.
 - Execution commands are verified against Cucumber.
-
-## Example Invocations
-- Generate feature and steps from `codegen/payment_raw.spec.ts`.
-- Intelligently generate feature and Screenplay step definitions directly from a passing raw script.
-- Scaffold `features/codegen/search.feature` and matching step file in `step-definitions/codegen/search.steps.ts`.

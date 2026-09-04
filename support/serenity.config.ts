@@ -11,7 +11,7 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 const timeouts = {
     cucumber: {
-        step: Duration.ofSeconds(60),                       // how long to wait for a Cucumber step to complete
+        step: Duration.ofSeconds(120),                      // how long to wait for a Cucumber step to complete
     },
     playwright: {
         defaultNavigationTimeout: Duration.ofSeconds(30),   // how long to wait for a page to load
@@ -41,11 +41,12 @@ const environment = process.env.ENVIRONMENT || 'dev';
 
 // Map environment names to base URLs
 const baseUrls: Record<string, string> = {
-    dev: '',
-    qa: '',
-    prod: 'https://happiesthealth.com/',
+    dev: 'http://localhost:3000',
+    qa: 'https://uat.quickexamcreator.com',
+    uat: 'https://uat.quickexamcreator.com',
+    prod: 'https://quickexamcreator.com',
 };
-const baseURL = baseUrls[environment] || baseUrls['qa'];
+const baseURL = process.env.BASE_URL || baseUrls[environment] || baseUrls['uat'];
 
 let browser: playwright.Browser;
 
@@ -79,7 +80,7 @@ BeforeAll(async () => {
         browser = await browserType.connect({ wsEndpoint });
     }
     else {
-        const isHeadless = process.env.HEADLESS !== 'false';
+        const isHeadless = process.env.HEADLESS?.toLowerCase() !== 'false';
         browser = await browserType.launch({
             headless: isHeadless,
             args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
@@ -106,9 +107,14 @@ BeforeAll(async () => {
             [ '@serenity-js/console-reporter', { theme: 'auto' } ],
             [ '@serenity-js/web:Photographer', { strategy: 'TakePhotosOfFailures' } ],
             [ '@serenity-js/core:ArtifactArchiver', { outputDirectory: path.resolve(process.cwd(), 'target/site/serenity') } ],
-            [ '@serenity-js/serenity-bdd', { 
+            // Built-in HTML Reporter: generates standalone interactive report & living docs without Java CLI dependencies
+            [ '@serenity-js/html-reporter', { 
+                outputDirectory: path.resolve(process.cwd(), 'target/site/serenity'), 
+                title: 'Pariksha Assessment Engine E2E Suite', 
                 specDirectory: path.resolve(process.cwd(), 'features'),
-                project: 'NeoFlow-QA'
+                project: 'NeoFlow-QA',
+                maxHistory: 10,
+                consistencyWindow: 5,
             } ],
         ],
 

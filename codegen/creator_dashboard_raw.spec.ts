@@ -1,4 +1,4 @@
-import { expect,test } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test('Creator can access dashboard and add a new question', async ({ page }) => {
   test.setTimeout(60000);

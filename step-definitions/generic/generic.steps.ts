@@ -1,5 +1,5 @@
 import { Given, Then, When } from '@cucumber/cucumber';
-import { Ensure } from '@serenity-js/assertions';
+import { Ensure, equals } from '@serenity-js/assertions';
 import { actorInTheSpotlight } from '@serenity-js/core';
 import { By, Enter, isVisible, PageElement } from '@serenity-js/web';
 

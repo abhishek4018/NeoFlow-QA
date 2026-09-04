@@ -1,0 +1,22 @@
+FROM mcr.microsoft.com/playwright:v1.62.1-jammy
+
+# Set working directory
+WORKDIR /app
+
+# Copy package descriptors & install dependencies
+COPY package*.json ./
+RUN npm ci
+
+# Copy test framework source code
+COPY . .
+
+# Default Environment Variables
+ENV ENVIRONMENT=uat
+ENV BASE_URL=https://uat.quickexamcreator.com
+ENV HEADLESS=true
+
+# Create report destination directory
+RUN mkdir -p target/site/serenity
+
+# Entrypoint to execute Cucumber test suite and generate Serenity/JS HTML report
+CMD ["sh", "-c", "npm run clean && npx cucumber-js --tags \"@smoke\""]

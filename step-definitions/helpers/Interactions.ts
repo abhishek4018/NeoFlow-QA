@@ -1,12 +1,13 @@
-import { Duration,Interaction } from '@serenity-js/core';
+import { Duration, Interaction } from '@serenity-js/core';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
+import { PageElement } from '@serenity-js/web';
 
 /**
  * Clicks a Serenity‑JS `PageElement` after waiting for it to be visible.
  * It uses Playwright directly for a forced click, which is robust in headless mode.
  *
  * @param target   The Serenity‑JS PageElement to click.
- * @param maxWait  Maximum time to wait for the element (default 30 seconds).
+ * @param maxWait  Maximum time to wait for the element (default 90 seconds).
  */
 export const ClickWhenReady = (
     target: any,
@@ -36,6 +37,7 @@ export const ClickWhenReady = (
         if (typeof locator.scrollIntoViewIfNeeded === 'function') {
             await locator.scrollIntoViewIfNeeded();
         }
+
         // Check if element is an anchor link with href
         let targetHref: string | null = null;
         try {
@@ -51,13 +53,23 @@ export const ClickWhenReady = (
             return;
         }
 
-        // Attempt click with retry
+        // Attempt click with retry and force click fallback
         try {
             await locator.click({ timeout: maxWait.inMilliseconds() });
             await page.waitForTimeout(500);
         } catch (e) {
-            await locator.click({ force: true, timeout: maxWait.inMilliseconds() });
-            await page.waitForTimeout(500);
+            try {
+                await locator.click({ force: true, timeout: maxWait.inMilliseconds() });
+                await page.waitForTimeout(500);
+            } catch (fallbackError) {
+                const selector = typeof target?.locatedBy === 'function' ? target.locatedBy().toString() : '';
+                if (selector && !selector.trim().startsWith('<')) {
+                    await page.waitForSelector(selector, { state: 'visible', timeout: maxWait.inMilliseconds() });
+                    await page.click(selector, { force: true, timeout: maxWait.inMilliseconds() });
+                } else {
+                    throw fallbackError;
+                }
+            }
         }
     }
 );

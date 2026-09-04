@@ -27,3 +27,9 @@ codegen/*.spec.ts
 
 # Local environment variables
 .env
+
+.magic_link_token.tmp
+
+# Playwright reports and test results
+playwright-report/
+test-results/

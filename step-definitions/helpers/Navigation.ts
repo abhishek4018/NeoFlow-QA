@@ -1,6 +1,3 @@
-// step-definitions/helpers/Navigation.ts
-// Helper to navigate to a URL and accept the cookie/DPDP banner if present.
-
 import { Interaction, Task } from '@serenity-js/core';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
 import { Navigate } from '@serenity-js/web';
@@ -26,12 +23,12 @@ export const NavigateToAppAndAcceptCookies = (pathOrUrl: string) => {
         Navigate.to(fullUrl),
         Interaction.where('Accept cookie banner if present', async (actor) => {
             const playwright = (actor as any).abilityTo(BrowseTheWebWithPlaywright);
-            const context = playwright.browserContext || playwright.context;
+            const context = playwright?.browserContext || playwright?.context;
             const pages = context?.pages?.() || [];
             const page = pages[pages.length - 1];
             if (page) {
-                const acceptBtn = page.getByRole('button', { name: 'Accept & Continue' });
-                if (await acceptBtn.isVisible().catch(() => false)) {
+                const acceptBtn = page.getByRole('button', { name: /Accept & Continue|Save & Continue|Accept/i });
+                if (await acceptBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
                     await acceptBtn.click().catch(() => {});
                 }
             }

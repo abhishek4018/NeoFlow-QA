@@ -102,6 +102,7 @@ Example `.env` values:
 USE_LAMBDATEST=false
 BROWSER=chromium
 ENVIRONMENT=qa
+HEADLESS=false
 
 # LambdaTest credentials and capability overrides (optional)
 # LT_USERNAME=YOUR_LAMBDATEST_USERNAME
@@ -135,44 +136,62 @@ BROWSER=webkit ENVIRONMENT=prod npx cucumber-js --tags "@regression"
 
 ### Windows: environment variables and Cucumber (examples)
 
-| Shell        | Command |
-| ------------ | ------- |
-| cmd.exe      | `set BROWSER=firefox && set ENVIRONMENT=dev && npx cucumber-js --profile default --tags "@MyTest"` |
-| PowerShell   | `$env:BROWSER="firefox"; $env:ENVIRONMENT="dev"; npx cucumber-js --profile default --tags "@MyTest"` |
+| Shell      | Command                                                                                                |
+| ---------- | ------------------------------------------------------------------------------------------------------ |
+| cmd.exe    | `set BROWSER=firefox && set ENVIRONMENT=dev && npx cucumber-js --profile default --tags "@MyTest"`   |
+| PowerShell | `$env:BROWSER="firefox"; $env:ENVIRONMENT="dev"; npx cucumber-js --profile default --tags "@MyTest"` |
 
-**cmd.exe** (run tests and Serenity BDD report):
+**cmd.exe** (run tests with automatic HTML report generation):
 
 ```cmd
-set BROWSER=firefox && set ENVIRONMENT=prod && npx cucumber-js --profile default --tags "@MyTest" && npx serenity-bdd run --features ./features
+set BROWSER=firefox && set ENVIRONMENT=prod && npx cucumber-js --profile default --tags "@MyTest"
 ```
 
 **PowerShell:**
 
 ```powershell
-$env:BROWSER="firefox"; $env:ENVIRONMENT="prod"; npx cucumber-js --profile default --tags "@MyTest"; npx serenity-bdd run --features ./features
+$env:BROWSER="firefox"; $env:ENVIRONMENT="prod"; npx cucumber-js --profile default --tags "@MyTest"
 ```
 
 ---
 
 ## Running Tests and Generating Serenity/JS Report
 
-`npm test` runs **clean → all Cucumber scenarios → Serenity BDD report** (no tag filter). Set `BROWSER` / `ENVIRONMENT` the same way as above when you run it. With the default `baseUrls` in `serenity.config.ts`, use e.g. `ENVIRONMENT=prod npm test` for the bundled Happiest Health scenario (`Navigate.to('')` needs a non-empty base URL).
+`npm test` runs **clean → test:execute** (runs all Cucumber scenarios and automatically generates the Serenity/JS HTML report in-process via `@serenity-js/html-reporter`). Set `BROWSER` / `ENVIRONMENT` the same way as above when you run it. With the default `baseUrls` in `serenity.config.ts`, use e.g. `ENVIRONMENT=prod npm test` for the bundled Happiest Health scenario (`Navigate.to('')` needs a non-empty base URL).
 
-To run **only tagged** scenarios and then the report (equivalent pieces of `npm test`, but filtered):
+To run **only tagged** scenarios (which also automatically generate the HTML report via the Serenity/JS crew):
 
 ### Mac/Linux (bash, zsh, etc.)
+
 ```sh
-npm run clean; BROWSER=firefox ENVIRONMENT=prod npx cucumber-js --profile default --tags "@redbus-scenario"; npx serenity-bdd run --features ./features
+# Pariksha UAT @smoke Test Suite Execution (Wipes old target data, runs @smoke on UAT, generates Serenity HTML report):
+ENVIRONMENT=uat npm run test:smoke
+
+# Serve the Serenity/JS HTML report at http://localhost:8080
+npm start
+
+npm run clean && HEADLESS=false BROWSER=chrome ENVIRONMENT=dev npx cucumber-js --tags "@smoke"
+
+HEADLESS=false BASE_URL=https://uat.quickexamcreator.com npm run test:negative
 ```
 
 ### Windows Command Prompt (cmd.exe)
+
 ```cmd
-npm run clean & set BROWSER=firefox & set ENVIRONMENT=prod & npx cucumber-js --profile default --tags "@redbus-scenario" & npx serenity-bdd run --features ./features
+npm run clean & set BROWSER=firefox & set ENVIRONMENT=prod & npx cucumber-js --profile default --tags "@redbus-scenario"
 ```
 
 ### Windows PowerShell
+
 ```powershell
-npm run clean; $env:BROWSER="firefox"; $env:ENVIRONMENT="prod"; npx cucumber-js --profile default --tags "@HappiestHealthHome"; npx serenity-bdd run --features ./features
+npm run clean; $env:BROWSER="firefox"; $env:ENVIRONMENT="prod"; npx cucumber-js --profile default --tags "@HappiestHealthHome"
 ```
 
-After running, open `target/site/serenity/index.html` in your browser to view the Serenity/JS report.
+### Viewing Reports
+
+After running any test command, the standalone interactive HTML report and living documentation are generated directly under `target/site/serenity/index.html`. You can preview it with:
+
+```sh
+npm start
+```
+or open `target/site/serenity/index.html` directly in your browser.
