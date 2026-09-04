@@ -1,15 +1,16 @@
-import { NavigateToAppAndAcceptCookies } from './helpers/Navigation';
-import { Given, When, Then } from '@cucumber/cucumber';
-import { actorCalled, actorInTheSpotlight, Duration, Wait } from '@serenity-js/core';
-import { Navigate, Enter, PageElement, By, isVisible, isEnabled, Text, ExecuteScript } from '@serenity-js/web';
-import { ClickWhenReady } from './helpers/Interactions';
+import { Given, Then, When } from '@cucumber/cucumber';
 import { Ensure, includes } from '@serenity-js/assertions';
+import { actorCalled, actorInTheSpotlight, Duration, Wait } from '@serenity-js/core';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
+import { By, Enter, ExecuteScript, isEnabled, isVisible, PageElement, Text } from '@serenity-js/web';
+import * as fs from 'fs';
+
+import { ClickWhenReady } from './helpers/Interactions';
+import { NavigateToAppAndAcceptCookies } from './helpers/Navigation';
 
 // Page Elements using explicit ID and Accessibility Locators
 const QuickGeneratorTextarea = () => PageElement.located(By.css('textarea')).describedAs('Quick Generator source text input');
 const GenerateQuestionsButton = () => PageElement.located(By.id('btn-generate-questions')).describedAs('Generate Question Set button');
-const ProceedWorkspaceButton = () => PageElement.located(By.id('btn-proceed-workspace')).describedAs('Proceed to Workspace Dashboard button');
 const SignupEmailInput = () => PageElement.located(By.id('input-signup-email')).describedAs('Faculty Signup Email input');
 const RequestMagicLinkButton = () => PageElement.located(By.id('btn-request-magic-link')).describedAs('Get Magic Link button');
 const LaunchDashboardLink = () => PageElement.located(By.id('link-launch-dashboard')).describedAs('Launch Creator Dashboard link');
@@ -25,7 +26,6 @@ const CopyExamLinkButton = () => PageElement.located(By.id('btn-copy-exam-link')
 
 const CandidateFirstNameInput = () => PageElement.located(By.id('firstName')).describedAs('Candidate First Name input');
 const StartAssessmentButton = () => PageElement.located(By.id('btn-start-assessment')).describedAs('Start Assessment button');
-const AgreeStartTestButton = () => PageElement.located(By.id('btn-agree-start-test')).describedAs('Agree & Start Test button');
 const ConfirmSubmitAssessmentButton = () => PageElement.located(By.id('btn-confirm-submit-assessment')).describedAs('Finalize & Submit Assessment button');
 
 let shareableExamLink = '';
@@ -108,8 +108,10 @@ Then('{actor} extracts and saves the magic link token for the faculty session', 
             const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
             const fullUrl = href.startsWith('http') ? href : `${baseUrl}${href}`;
             try {
-                require('fs').writeFileSync('.magic_link_token.tmp', fullUrl);
-            } catch (e) {}
+                fs.writeFileSync('.magic_link_token.tmp', fullUrl);
+            } catch (_e) {
+                // ignore file write error
+            }
         }
     }
 });
@@ -117,10 +119,12 @@ Then('{actor} extracts and saves the magic link token for the faculty session', 
 Given('{actor} opens the Faculty Creator Dashboard using the saved magic link token', async (actor) => {
     let dashboardUrl = '/public';
     try {
-        if (require('fs').existsSync('.magic_link_token.tmp')) {
-            dashboardUrl = require('fs').readFileSync('.magic_link_token.tmp', 'utf-8').trim();
+        if (fs.existsSync('.magic_link_token.tmp')) {
+            dashboardUrl = fs.readFileSync('.magic_link_token.tmp', 'utf-8').trim();
         }
-    } catch (e) {}
+    } catch (_e) {
+        // ignore read error
+    }
     await actor.attemptsTo(
         NavigateToAppAndAcceptCookies(dashboardUrl)
     );
@@ -183,8 +187,10 @@ Then('{actor} should extract and save the shareable public assessment link', asy
         process.env.SHAREABLE_EXAM_LINK = link;
         (global as any).shareableExamLink = link;
         try {
-            require('fs').writeFileSync('.shareable_exam_link.tmp', link);
-        } catch (e) {}
+            fs.writeFileSync('.shareable_exam_link.tmp', link);
+        } catch (_e) {
+            // ignore
+        }
     }
 });
 
@@ -213,8 +219,10 @@ Then('{actor} should extract the shareable public assessment link', async (actor
         process.env.SHAREABLE_EXAM_LINK = link;
         (global as any).shareableExamLink = link;
         try {
-            require('fs').writeFileSync('.shareable_exam_link.tmp', link);
-        } catch (e) {}
+            fs.writeFileSync('.shareable_exam_link.tmp', link);
+        } catch (_e) {
+            // ignore
+        }
     }
 });
 
@@ -222,10 +230,12 @@ Given('a candidate navigates to the saved shareable exam link', async () => {
     const actor = actorCalled('Alex Student');
     let targetUrl = process.env.SHAREABLE_EXAM_LINK || (global as any).shareableExamLink || shareableExamLink;
     try {
-        if (!targetUrl && require('fs').existsSync('.shareable_exam_link.tmp')) {
-            targetUrl = require('fs').readFileSync('.shareable_exam_link.tmp', 'utf-8').trim();
+        if (!targetUrl && fs.existsSync('.shareable_exam_link.tmp')) {
+            targetUrl = fs.readFileSync('.shareable_exam_link.tmp', 'utf-8').trim();
         }
-    } catch (e) {}
+    } catch (_e) {
+        // ignore
+    }
     targetUrl = targetUrl || '/public';
     await actor.attemptsTo(
         NavigateToAppAndAcceptCookies(targetUrl)

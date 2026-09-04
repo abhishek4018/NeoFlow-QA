@@ -1,6 +1,5 @@
 import { Duration, Interaction } from '@serenity-js/core';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
-import { PageElement } from '@serenity-js/web';
 
 /**
  * Clicks a Serenity‑JS `PageElement` after waiting for it to be visible.

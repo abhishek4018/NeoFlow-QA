@@ -1,7 +1,8 @@
-import { NavigateToAppAndAcceptCookies } from './helpers/Navigation';
 import { Given, Then } from '@cucumber/cucumber';
-import { Navigate, PageElement, By, Text } from '@serenity-js/web';
 import { Ensure, includes } from '@serenity-js/assertions';
+import { By, PageElement, Text } from '@serenity-js/web';
+
+import { NavigateToAppAndAcceptCookies } from './helpers/Navigation';
 
 const PageHeading = () => PageElement.located(By.css('h1')).describedAs('Main Page Heading');
 const FooterElement = () => PageElement.located(By.css('footer')).describedAs('Footer Navigation');
@@ -19,7 +20,7 @@ Then('{actor} should verify the text contains publisher ID {string}', async (act
   );
 });
 
-Then('{actor} should verify the script element contains client ID {string}', async (actor, clientId: string) => {
+Then('{actor} should verify the script element contains client ID {string}', async (actor, _clientId: string) => {
   await actor.attemptsTo(
     Ensure.that(Text.of(PageHeading()), includes('Vatra'))
   );

@@ -1,9 +1,10 @@
-import { NavigateToAppAndAcceptCookies } from './helpers/Navigation';
-import { Given, When, Then } from '@cucumber/cucumber';
-import { actorInTheSpotlight, Duration, Wait } from '@serenity-js/core';
-import { Navigate, Click, PageElement, By, Text, isVisible } from '@serenity-js/web';
+import { Given, Then,When } from '@cucumber/cucumber';
 import { Ensure, includes } from '@serenity-js/assertions';
+import { actorInTheSpotlight, Duration, Wait } from '@serenity-js/core';
 import { BrowseTheWebWithPlaywright } from '@serenity-js/playwright';
+import { By, Click, isVisible, PageElement, Text } from '@serenity-js/web';
+
+import { NavigateToAppAndAcceptCookies } from './helpers/Navigation';
 
 Given('{actor} navigates to homepage {string}', async (actor, url: string) => {
   await actor.attemptsTo(

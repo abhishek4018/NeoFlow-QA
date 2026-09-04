@@ -1,10 +1,9 @@
-import { Given, Then, When } from '@cucumber/cucumber';
-import { Ensure, includes } from '@serenity-js/assertions';
+import { Then, When } from '@cucumber/cucumber';
+import { Ensure } from '@serenity-js/assertions';
 import { actorInTheSpotlight } from '@serenity-js/core';
-import { By, isVisible, Page, PageElement } from '@serenity-js/web';
+import { By, isVisible, PageElement } from '@serenity-js/web';
 
 import { ClickWhenReady } from '../helpers/Interactions';
-import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
 
 
 When('the user clicks on "<element_label>"', async () => {
