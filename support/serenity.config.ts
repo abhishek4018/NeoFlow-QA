@@ -41,12 +41,12 @@ const environment = process.env.ENVIRONMENT || 'dev';
 
 // Map environment names to base URLs
 const baseUrls: Record<string, string> = {
-    dev: 'http://localhost:3000',
-    qa: 'https://uat.quickexamcreator.com',
-    uat: 'https://uat.quickexamcreator.com',
-    prod: 'https://quickexamcreator.com',
+    dev: process.env.BASE_URL || 'http://localhost:3000',
+    qa: process.env.BASE_URL || 'http://localhost:3000',
+    uat: process.env.BASE_URL || 'http://localhost:3000',
+    prod: process.env.BASE_URL || 'http://localhost:3000',
 };
-const baseURL = process.env.BASE_URL || baseUrls[environment] || baseUrls['uat'];
+const baseURL = process.env.BASE_URL || baseUrls[environment] || '';
 
 let browser: playwright.Browser;
 
@@ -110,9 +110,9 @@ BeforeAll(async () => {
             // Built-in HTML Reporter: generates standalone interactive report & living docs without Java CLI dependencies
             [ '@serenity-js/html-reporter', { 
                 outputDirectory: path.resolve(process.cwd(), 'target/site/serenity'), 
-                title: 'Pariksha Assessment Engine E2E Suite', 
+                title: process.env.REPORT_TITLE || 'Autonomous Serenity/JS Living Documentation', 
                 specDirectory: path.resolve(process.cwd(), 'features'),
-                project: 'NeoFlow-QA',
+                project: process.env.PROJECT_NAME || 'NeoFlow-QA',
                 maxHistory: 10,
                 consistencyWindow: 5,
             } ],

@@ -6,8 +6,11 @@ import { Navigate } from '@serenity-js/web';
  * Resolves a route path or full URL against process.env.BASE_URL
  */
 export function resolveTargetUrl(targetPathOrUrl: string): string {
-    const baseUrl = (process.env.BASE_URL || 'https://quickexamcreator.com').replace(/\/+$/, '');
     if (targetPathOrUrl.startsWith('http://') || targetPathOrUrl.startsWith('https://')) {
+        return targetPathOrUrl;
+    }
+    const baseUrl = (process.env.BASE_URL || '').replace(/\/+$/, '');
+    if (!baseUrl) {
         return targetPathOrUrl;
     }
     const cleanPath = targetPathOrUrl.startsWith('/') ? targetPathOrUrl : `/${targetPathOrUrl}`;
