@@ -1,0 +1,17 @@
+[Unit]
+Description=CARE Autonomous QA Daemon (NeoFlow-QA)
+After=network.target
+
+[Service]
+Type=simple
+User=abhishekkumar
+WorkingDirectory=/home/abhishekkumar/NeoFlow-QA
+ExecStart=/usr/bin/npm run care:daemon
+Restart=always
+RestartSec=10
+Environment=ENVIRONMENT=uat
+Environment=HEADLESS=true
+Environment=AI_PROVIDER=vertex
+
+[Install]
+WantedBy=multi-user.target

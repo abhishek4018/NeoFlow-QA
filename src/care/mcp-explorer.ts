@@ -22,7 +22,7 @@ export class MCPBrowserExplorer {
   /**
    * Explores the target URL and discovers key interactive workflows
    */
-  async exploreUrl(targetUrl: string, config: Partial<CareConfig> = {}): Promise<DiscoveredFlowTrace[]> {
+  async exploreUrl(targetUrl: string, _config: Partial<CareConfig> = {}): Promise<DiscoveredFlowTrace[]> {
     if (!this.browser) {
       await this.init();
     }

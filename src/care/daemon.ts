@@ -1,157 +1,53 @@
-import { chromium } from '@playwright/test';
-import * as fs from 'fs';
-import * as http from 'http';
-import * as path from 'path';
+import { MCPBrowserExplorer } from './mcp-explorer';
+import { BDDSynthesizer } from './synthesizer';
 
-import { AutonomousOrchestrator } from '../cli/orchestrator';
-import { SPKBDb } from '../spkb/db';
-import { CareConfig, loadCareConfig } from './config';
-import { PRPublisher } from './pr-publisher';
-import { StabilityGate } from './stability-gate';
-import { StateTracker } from './state-tracker';
+async function runAutonomousCycle(targetUrl?: string) {
+  const url = targetUrl || process.env.BASE_URL || 'https://example.com';
+  console.log(`\n==================================================`);
+  console.log(`🚀 [CARE Autonomous Engine] Starting exploration on: ${url}`);
+  console.log(`==================================================\n`);
 
-export interface DaemonOptions {
-    configPath?: string;
-    intervalMinutes?: number;
-    once?: boolean;
+  const explorer = new MCPBrowserExplorer();
+  const synthesizer = new BDDSynthesizer();
+
+  try {
+    const traces = await explorer.exploreUrl(url);
+    if (traces.length === 0) {
+      console.log(`ℹ️ [CARE] No interactive workflows discovered.`);
+      return;
+    }
+
+    for (const trace of traces) {
+      console.log(`\n📝 [CARE] Synthesizing BDD assets for flow: "${trace.flowName}"`);
+      const { featurePath, stepDefPath } = synthesizer.synthesizeFlow(trace);
+      console.log(`✅ [CARE] Ready: Feature [${featurePath}] | Steps [${stepDefPath}]`);
+    }
+
+    console.log(`\n✨ [CARE] Autonomous exploration and synthesis completed successfully.`);
+  } catch (err: any) {
+    console.error(`❌ [CARE] Autonomous cycle encountered error: ${err.message}`);
+  } finally {
+    await explorer.close();
+  }
 }
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+async function main() {
+  const args = process.argv.slice(2);
+  const isOnce = args.includes('--once') || args.includes('--explore');
+  const targetUrlArg = args.find(a => a.startsWith('http://') || a.startsWith('https://'));
 
-export class CareDaemon {
-    private options: DaemonOptions;
-    private config: CareConfig;
-    private running: boolean = false;
+  if (isOnce) {
+    await runAutonomousCycle(targetUrlArg);
+  } else {
+    console.log(`🔄 [CARE Daemon] Starting continuous daemon (Interval: 10m)...`);
+    await runAutonomousCycle(targetUrlArg);
 
-    constructor(options: DaemonOptions = {}) {
-        this.options = options;
-        this.config = loadCareConfig(options.configPath);
-    }
-
-    public async executeSingleCycle(): Promise<void> {
-        console.log(`\n🚀 [CARE Daemon] Starting autonomous exploration cycle for ${this.config.targetUrl}...`);
-        const _db = new SPKBDb('spkb.db');
-        const _stateTracker = new StateTracker(_db);
-        const _stabilityGate = new StabilityGate();
-        const _prPublisher = new PRPublisher({
-            dryRun: !this.config.git.autoPr,
-            baseBranch: this.config.git.baseBranch,
-            branchPrefix: this.config.git.branchPrefix
-        });
-
-        const browser = await chromium.launch({
-            headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
-        });
-        const page = await browser.newPage();
-
-        try {
-            const orchestrator = new AutonomousOrchestrator({
-                targetUrl: this.config.targetUrl,
-                maxDepth: this.config.depthLimit,
-                maxPages: this.config.maxPages,
-                maxAutoHealingAttempts: 3
-            });
-
-            const result = await orchestrator.runCycle(page);
-            console.log(`✅ [CARE Daemon] Cycle finished. Pages explored: ${result.pagesExplored}`);
-        } catch (err) {
-            console.error('❌ [CARE Daemon] Cycle error:', err);
-        } finally {
-            await browser.close();
-        }
-    }
-
-    private startReportServer(port: number = 8080): void {
-        const reportDir = path.resolve(process.cwd(), 'target/site/serenity');
-
-        const mimeTypes: Record<string, string> = {
-            '.html': 'text/html; charset=utf-8',
-            '.js': 'text/javascript',
-            '.css': 'text/css',
-            '.json': 'application/json',
-            '.png': 'image/png',
-            '.jpg': 'image/jpeg',
-            '.svg': 'image/svg+xml',
-            '.ico': 'image/x-icon',
-            '.woff': 'font/woff',
-            '.woff2': 'font/woff2',
-            '.ttf': 'font/ttf'
-        };
-
-        const server = http.createServer((req: http.IncomingMessage, res: http.ServerResponse) => {
-            let reqUrl = (req.url || '/').split('?')[0];
-            if (reqUrl === '/' || reqUrl.endsWith('/')) {
-                reqUrl += 'index.html';
-            }
-            const safePath = path.normalize(reqUrl).replace(/^(\.\.[/\\])+/, '');
-            const filePath = path.join(reportDir, safePath);
-
-            if (!fs.existsSync(filePath) || fs.statSync(filePath).isDirectory()) {
-                res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-                res.end(`<html><body style="font-family:sans-serif;padding:40px;text-align:center;">
-                    <h2>🤖 NeoFlow CARE Daemon Report Server</h2>
-                    <p>Serenity living documentation is being generated...</p>
-                </body></html>`);
-                return;
-            }
-
-            const ext = path.extname(filePath).toLowerCase();
-            const contentType = mimeTypes[ext] || 'application/octet-stream';
-            res.writeHead(200, { 'Content-Type': contentType });
-            fs.createReadStream(filePath).pipe(res);
-        });
-
-        server.on('error', (err: any) => {
-            if (err.code === 'EADDRINUSE') {
-                console.warn(`ℹ️ [CARE Daemon] Port ${port} is already in use (e.g. by Docker). Skipping embedded report server.`);
-            } else {
-                console.warn(`⚠️ [CARE Daemon] Report server notice:`, err.message);
-            }
-        });
-
-        try {
-            server.listen(port, '0.0.0.0', () => {
-                console.log(`📊 [CARE Daemon] Live Serenity BDD Report Server running at http://0.0.0.0:${port}`);
-            });
-        } catch (_e) {
-            // ignore synchronous listen errors
-        }
-    }
-
-    public async start(): Promise<void> {
-        if (this.options.once) {
-            await this.executeSingleCycle();
-            return;
-        }
-
-        this.startReportServer(Number(process.env.REPORT_PORT) || 8080);
-
-        const defaultInterval = Number(process.env.CARE_INTERVAL_MINUTES) || 5;
-        const intervalMinutes = this.options.intervalMinutes || defaultInterval;
-        const intervalMs = intervalMinutes * 60 * 1000;
-        console.log(`🕒 [CARE Daemon] Scheduled to run every ${intervalMinutes} minutes.`);
-
-        this.running = true;
-        while (this.running) {
-            await this.executeSingleCycle();
-            if (this.running) {
-                console.log(`⏳ [CARE Daemon] Sleeping for ${intervalMinutes} minutes until next exploration cycle...`);
-                await sleep(intervalMs);
-            }
-        }
-    }
-
-    public stop(): void {
-        this.running = false;
-        console.log(`🛑 [CARE Daemon] Stopping...`);
-    }
+    setInterval(async () => {
+      await runAutonomousCycle(targetUrlArg);
+    }, 10 * 60 * 1000);
+  }
 }
 
 if (require.main === module) {
-    const isOnce = process.argv.includes('--once');
-    const intervalArgIdx = process.argv.indexOf('--interval');
-    const intervalMinutes = intervalArgIdx !== -1 ? Number(process.argv[intervalArgIdx + 1]) : undefined;
-    const daemon = new CareDaemon({ once: isOnce, intervalMinutes });
-    daemon.start();
+  main().catch(console.error);
 }

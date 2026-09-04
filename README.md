@@ -5,7 +5,31 @@
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 [![Serenity/JS](https://img.shields.io/badge/Serenity%2FJS-3.32.3-blueviolet)](https://serenity-js.org)
 
-This repository provides an automated agentic BDD testing framework built on **Serenity/JS**, **Cucumber.js**, **Playwright**, and **TypeScript**, powered by the custom **`neo`** AI agent workflow.
+This repository provides a **universal, project-agnostic autonomous BDD test automation framework** built on **Serenity/JS**, **Cucumber.js**, **Playwright**, and **TypeScript**, powered by **Vertex AI / Hermes-3** and **Playwright MCP**.
+
+Given **any target URL**, the autonomous engine:
+1. Crawls and explores interactive user journeys via Playwright MCP.
+2. Synthesizes standard Screenplay BDD assets in `features/codegen/` and `step-definitions/codegen/`.
+3. Validates and auto-heals locators using multimodal visual and semantic failure healing.
+
+---
+
+### 🚀 Quick Start: Autonomous Test Discovery for Any URL
+
+To autonomously explore any target web application and generate complete Serenity/JS BDD test suites:
+
+```sh
+# Autonomously crawl and synthesize BDD tests for any web application:
+npm run care:explore -- https://example.com
+
+# Run the generated smoke test suite:
+npm run test:smoke
+
+# View interactive Serenity HTML report:
+npm start
+```
+
+---
 
 ### Installation
 
@@ -23,17 +47,14 @@ npx playwright install
 The project provides several [NPM scripts](https://docs.npmjs.com/cli/v6/using-npm/scripts) defined in [`package.json`](package.json):
 
 ```
-npm run lint            # runs code linter via ESLint
-npm run lint:fix        # attempts to automatically fix linting issues
-npm run clean           # removes reports from any previous test run
-npm test                # executes the example test suite
-                        # and generates the report under ./target/site/serenity
-npm start               # starts a mini HTTP server and serves test reports
-                        # at http://localhost:8080
-npm run codegen         # Playwright codegen (CLI default: playwright-test style)
-npm run codegen:library # record using the JavaScript library API; saves to generated/codegen/recording.ts
-npm run codegen:library:preview   # same target as above, but UI only (no file written)
-npm run codegen:playwright-test   # record with @playwright/test-style output
+npm run care:explore -- <url> # Autonomously explore any URL and synthesize BDD tests
+npm run care:heal             # Auto-heal broken test steps using failure screenshots + DOM
+npm run care:daemon           # Start continuous background regression daemon
+npm run test:smoke            # Runs smoke test suite
+npm run test:regression       # Runs full regression test suite
+npm run test:report           # Serves interactive Serenity HTML reports at http://localhost:8080
+npm run lint                  # Runs code linter via ESLint
+npm run lint:fix              # Automatically fixes linting issues
 ```
 
 ## Playwright Codegen & Raw Script Replays

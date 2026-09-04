@@ -20,9 +20,10 @@
     "codegen:library": "mkdirp generated/codegen && playwright codegen --target javascript -o generated/codegen/recording.ts",
     "codegen:library:preview": "playwright codegen --target javascript",
     "codegen:playwright-test": "playwright codegen --target playwright-test",
+    "care:explore": "ts-node --transpile-only src/care/daemon.ts --explore",
+    "care:heal": "ts-node --transpile-only src/care/visual-healer.ts",
     "care:run": "ts-node --transpile-only src/care/daemon.ts --once",
-    "care:daemon": "ts-node --transpile-only src/care/daemon.ts",
-    "care:status": "node -e \"const Database = require('better-sqlite3'); const db = new Database('spkb.db'); const flows = db.prepare('SELECT id, flow_name, feature_path, last_verified_at FROM care_flows ORDER BY id ASC').all(); console.table(flows);\""
+    "care:daemon": "ts-node --transpile-only src/care/daemon.ts"
   },
   "repository": {
     "type": "git",
