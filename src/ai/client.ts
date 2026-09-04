@@ -111,42 +111,56 @@ Output ONLY valid JSON matching this schema without markdown code blocks:
 
   let responseText = '';
 
-  if (provider === 'vertex' && options.screenshotBuffer) {
-    const vertex = getVertexClient();
-    const model = vertex.getGenerativeModel({
-      model: process.env.VERTEX_REASONING_MODEL || 'gemini-1.5-pro-preview-0409',
-      generationConfig: { temperature: 0.1 }
-    });
-
-    const result = await model.generateContent({
-      contents: [{
-        role: 'user',
-        parts: [
-          { inlineData: { mimeType: 'image/png', data: options.screenshotBuffer.toString('base64') } },
-          { text: prompt }
-        ]
-      }]
-    });
-
-    responseText = result.response?.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  } else {
-    responseText = await generateCompletion({
-      systemPrompt: 'You are an autonomous Serenity/JS BDD failure healer.',
-      userPrompt: prompt,
-      modelType: 'reasoning'
-    });
-  }
-
   try {
+    if (provider === 'vertex' && options.screenshotBuffer) {
+      const vertex = getVertexClient();
+      const model = vertex.getGenerativeModel({
+        model: process.env.VERTEX_REASONING_MODEL || 'gemini-1.5-pro-preview-0409',
+        generationConfig: { temperature: 0.1 }
+      });
+
+      const result = await model.generateContent({
+        contents: [{
+          role: 'user',
+          parts: [
+            { inlineData: { mimeType: 'image/png', data: options.screenshotBuffer.toString('base64') } },
+            { text: prompt }
+          ]
+        }]
+      });
+
+      responseText = result.response?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    } else {
+      responseText = await generateCompletion({
+        systemPrompt: 'You are an autonomous Serenity/JS BDD failure healer.',
+        userPrompt: prompt,
+        modelType: 'reasoning'
+      });
+    }
+
     const cleanedJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
     return JSON.parse(cleanedJson) as HealedLocatorResult;
-  } catch (_e) {
+  } catch (err: any) {
+    console.warn(`⚠️ [AI Client] Vision healing call failed: ${err.message}. Using heuristic fallback.`);
+
+    // Heuristic DOM extraction fallback
+    const idMatch = options.domSnippet.match(/id=["']([^"']+)["']/i);
+    if (idMatch) {
+      return {
+        pageElementName: 'HealedElement',
+        selectorType: 'id',
+        selectorValue: idMatch[1],
+        confidence: 0.8,
+        explanation: 'Heuristic fallback: extracted element ID from DOM snapshot'
+      };
+    }
+
     return {
       pageElementName: 'HealedElement',
       selectorType: 'css',
       selectorValue: options.currentSelector,
       confidence: 0.5,
-      explanation: 'Fallback locator due to unparsed AI response'
+      explanation: 'Fallback locator due to API error'
     };
   }
 }
