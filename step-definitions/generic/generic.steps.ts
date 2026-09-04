@@ -1,7 +1,7 @@
 import { Given, Then, When } from '@cucumber/cucumber';
-import { Ensure } from '@serenity-js/assertions';
+import { Ensure, includes } from '@serenity-js/assertions';
 import { actorInTheSpotlight } from '@serenity-js/core';
-import { By, Enter, isVisible, PageElement } from '@serenity-js/web';
+import { By, Enter, isVisible, PageElement, Text } from '@serenity-js/web';
 
 import { CheckElementPresent, ClickWhenReady } from '../helpers/Interactions';
 import { NavigateToAppAndAcceptCookies } from '../helpers/Navigation';
@@ -41,7 +41,7 @@ When('the user clicks the element with aria-label {string}', async (label: strin
 
 Then('the text {string} should be visible', async (text: string) => {
     await actorInTheSpotlight().attemptsTo(
-        Ensure.that(PageElement.located(By.xpath(`//*[contains(text(),'${text}')]`)), isVisible())
+        Ensure.eventually(Text.of(PageElement.located(By.css('body'))), includes(text))
     );
 });
 
