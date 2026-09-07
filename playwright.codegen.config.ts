@@ -8,7 +8,7 @@ export default defineConfig({
   reporter: [['html', { open: 'never' }]],
   use: {
     baseURL: process.env.BASE_URL ?? 'https://example.com',
-    headless: false,
+    headless: true,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     viewport: { width: 1536, height: 730 },
