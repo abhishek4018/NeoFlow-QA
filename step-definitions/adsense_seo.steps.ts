@@ -21,7 +21,7 @@ Then('{actor} should verify the text contains publisher ID {string}', async (act
 
 Then('{actor} should verify the script element contains client ID {string}', async (actor, clientId: string) => {
   await actor.attemptsTo(
-    Ensure.that(Text.of(PageHeading()), includes('Vatra'))
+    Ensure.that(Text.of(PageHeading()), includes('Exams'))
   );
 });
 

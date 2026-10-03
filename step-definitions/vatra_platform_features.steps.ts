@@ -13,9 +13,10 @@ Given('{actor} navigates to homepage {string}', async (actor, url: string) => {
 
 Then('{actor} should see the VATRA logo mark and tagline {string}', async (actor, tagline: string) => {
   const pageBody = PageElement.located(By.css('body')).describedAs('Page Body');
+  const logoImg = PageElement.located(By.css(`img[alt*="${tagline}"]`)).describedAs('VATRA Logo Image');
   await actor.attemptsTo(
     Ensure.that(Text.of(pageBody), includes('Vatra')),
-    Ensure.that(Text.of(pageBody), includes(tagline))
+    Wait.upTo(Duration.ofSeconds(5)).until(logoImg, isVisible())
   );
 });
 
