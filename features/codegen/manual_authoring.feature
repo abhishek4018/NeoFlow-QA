@@ -15,7 +15,7 @@ Feature: Manual authoring flow on public page
     Then the authoring text "1 QUESTION IN BLUEPRINT" should be visible
     When the user fills the question form with topic "General", stem "What is 2 + 2?", alternatives "3", "4", "5", "6", rationale "Because 2 + 2 equals 4"
     When the user clicks the button "Save to workspace"
-    Then the authoring text "Save Your Assessment" should be visible
+    Then the authoring text "Get Dashboard" should be visible
     And the button "Get Magic Link" should be visible
 
   @manual-authoring @codegen @e2e @regression
@@ -26,7 +26,7 @@ Feature: Manual authoring flow on public page
     Then the authoring text "1 QUESTION IN BLUEPRINT" should be visible
     When the user fills the question form with topic "General", stem "What is 2 + 2?", alternatives "3", "4", "5", "6", rationale "Because 2 + 2 equals 4"
     When the user clicks the button "Save to workspace"
-    Then the authoring text "Save Your Assessment" should be visible
+    Then the authoring text "Get Dashboard" should be visible
     When the user enters "qa-e2e@example.com" into the email field
     And the user clicks the button "Get Magic Link"
     Then the authoring text "Magic Link Dispatched!" should be visible
